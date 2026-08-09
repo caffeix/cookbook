@@ -3,7 +3,7 @@ load_dotenv()
 
 from flask import Flask
 from .extensions import db, migrate
-
+from .seed import seed_bp
 from .config import Config
 
 def create_app(config_class=Config):
@@ -15,6 +15,7 @@ def create_app(config_class=Config):
 
     from .blueprints.main.routes import main_bp
     app.register_blueprint(main_bp)
+    app.register_blueprint(seed_bp)
 
     from . import models
 
