@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+  <h1>Items</h1>
+  <ul>
+    {% for item in items %}
+      <li>{{ item.title }}</li>
+    {% else %}
+      <li>No items yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
