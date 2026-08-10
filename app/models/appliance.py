@@ -1,19 +1,29 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.associationproxy import association_proxy
+
 from app.extensions import db
 from app.models.mixins import TimestampMixin
-from sqlalchemy.ext.associationproxy import association_proxy
+
+if TYPE_CHECKING:
+    from app.models.recipe_appliance import RecipeAppliance
 
 
 class Appliance(TimestampMixin, db.Model):
     __tablename__ = "appliance"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), nullable=False)
-    icon = db.Column(db.String(255))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
+    icon: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
-    recipe_links = db.relationship(
+    recipe_links: Mapped[list[RecipeAppliance]] = relationship(
         "RecipeAppliance", back_populates="appliance", cascade="all, delete-orphan"
     )
     recipes = association_proxy("recipe_links", "recipe")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Appliance {self.id} {self.name!r}>"
