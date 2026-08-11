@@ -18,6 +18,7 @@ Browse all your personal recipes on Cooksique.
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/recipes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/drawer.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -43,41 +44,93 @@ Browse all your personal recipes on Cooksique.
   </form>
 </div>
 
-{# ── Category filter chip bar (only displayed when filters are applied) ─────────────────── #}
-{% if selected_category or request.args.get('q') %}
-{% if categories %}
-<div class="filter-row-wrapper" aria-label="Filter by category">
+{# ── Active-filter summary chip bar ─────────────────────────────────────── #}
+{# Shown only when at least one filter is active; tapping a chip removes it #}
+{% set has_any_filter = selected_category or selected_difficulty or selected_time_max or selected_tags or selected_appliances or selected_utensils or selected_ingredients or request.args.get('q') %}
+{% if has_any_filter %}
+<div class="filter-row-wrapper" aria-label="Active filters">
   <div class="filter-row" role="list">
 
-    {# "Clear" text button #}
-    <button class="filter-row__clear" type="button" aria-label="Clear category filter"
-      onclick="window.location='{{ url_for('recipes.list_recipes') }}'">
-      Clear
-    </button>
-
-    {# Chips sub-row (horizontally scrollable, no scrollbar) #}
+    {# Horizontally scrollable chip strip showing active selections #}
     <div class="filter-row__chips no-scrollbar">
 
-      {# "All" chip #}
-      <a href="{{ url_for('recipes.list_recipes') }}" class="chip{% if not selected_category %} chip--active{% endif %}"
-        role="listitem" aria-current="{% if not selected_category %}true{% endif %}">
-        All
-      </a>
+      {% set close_svg %}<svg class="chip__close" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>{% endset %}
 
-      {# Per-category chips #}
-      {% for cat in categories %}
-      <a href="{{ url_for('recipes.list_recipes', category=cat.slug) }}"
-        class="chip{% if selected_category == cat.slug %} chip--active{% endif %}" role="listitem"
-        aria-current="{% if selected_category == cat.slug %}true{% endif %}">
-        {% if cat.icon %}<span aria-hidden="true">{{ cat.icon }}</span>{% endif %}
-        {{ cat.name }}
+      {% if selected_category %}
+      {% for cat in categories %}{% if cat.slug == selected_category %}
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('category', cat.slug) }}" class="chip chip--active" role="listitem" title="Remove {{ cat.name }} filter">
+        {% if cat.icon %}<span aria-hidden="true">{{ cat.icon | render_icon }}</span>{% endif %}
+        <span>{{ cat.name }}</span>
+        {{ close_svg | safe }}
       </a>
+      {% endif %}{% endfor %}
+      {% endif %}
+
+      {% if selected_difficulty %}
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('difficulty', selected_difficulty) }}"
+        class="chip chip--active" role="listitem" title="Remove difficulty filter">
+        <span>{{ selected_difficulty | title }}</span>
+        {{ close_svg | safe }}
+      </a>
+      {% endif %}
+
+      {% if selected_time_max %}
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('time_max', selected_time_max) }}"
+        class="chip chip--active" role="listitem" title="Remove time filter">
+        <span>≤ {{ selected_time_max }} min</span>
+        {{ close_svg | safe }}
+      </a>
+      {% endif %}
+
+      {% for slug in selected_tags %}
+      {% for tag in tags %}{% if tag.slug == slug %}
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('tags', slug) }}"
+        class="chip chip--active" role="listitem" title="Remove {{ tag.name }} filter">
+        <span>{{ tag.name }}</span>
+        {{ close_svg | safe }}
+      </a>
+      {% endif %}{% endfor %}
+      {% endfor %}
+
+      {% for sid in selected_appliances %}
+      {% for appl in appliances_list %}{% if appl.id|string == sid %}
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('appliances', appl.id) }}"
+        class="chip chip--active" role="listitem" title="Remove {{ appl.name }} filter">
+        <span>{{ appl.name }}</span>
+        {{ close_svg | safe }}
+      </a>
+      {% endif %}{% endfor %}
+      {% endfor %}
+
+      {% for sid in selected_utensils %}
+      {% for ut in utensils_list %}{% if ut.id|string == sid %}
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('utensils', ut.id) }}"
+        class="chip chip--active" role="listitem" title="Remove {{ ut.name }} filter">
+        <span>{{ ut.name }}</span>
+        {{ close_svg | safe }}
+      </a>
+      {% endif %}{% endfor %}
+      {% endfor %}
+
+      {% for slug in selected_ingredients %}
+      {% for ingr in ingredients_list %}{% if ingr.slug == slug %}
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('ingredients', slug) }}"
+        class="chip chip--active" role="listitem" title="Remove {{ ingr.name }} filter">
+        <span>{{ ingr.name }}</span>
+        {{ close_svg | safe }}
+      </a>
+      {% endif %}{% endfor %}
       {% endfor %}
 
     </div>{# /filter-row__chips #}
+
+    {# "Clear" text button — clears ALL filters at once #}
+    <button class="filter-row__clear" type="button" aria-label="Clear all filters"
+      onclick="window.location='{{ url_for('recipes.list_recipes') }}'">
+      Clear
+    </button>
   </div>
 </div>
-{% endif %}
 {% endif %}
 
 {# ── Recipe list ──────────────────────────────────────────────────────── #}
@@ -157,15 +210,13 @@ Browse all your personal recipes on Cooksique.
         <div class="recipe-card__divider"></div>
         <div class="recipe-card__tools-row">
           <div class="recipe-card__tools" aria-label="Appliances and utensils">
-            {% for app in recipe.appliances %}
+            {% for app in recipe.appliances[:1] %}
             <span class="badge badge--tool">
-              {% if app.icon %}<span aria-hidden="true">{{ app.icon }}</span>{% endif %}
               {{ app.name }}
             </span>
             {% endfor %}
-            {% for ut in recipe.utensils %}
+            {% for ut in recipe.utensils[:1] %}
             <span class="badge badge--tool">
-              {% if ut.icon %}<span aria-hidden="true">{{ ut.icon }}</span>{% endif %}
               {{ ut.name }}
             </span>
             {% endfor %}
@@ -216,15 +267,23 @@ Browse all your personal recipes on Cooksique.
 
 </div>{# /recipe-list #}
 
-{# ── "Filter" CTA button ───────────────────────────────────────────────── #}
+{# ── Filter drawer component ──────────────────────────────────────────── #}
+{% include 'components/filter_drawer.html' %}
+
+{# ── "Filter" CTA button (fixed sticky bottom) ────────────────────────── #}
 <div class="filter-cta-wrapper">
-  <button class="filter-cta-btn" type="button" aria-label="Open filters">
-    {# Plus/filter icon #}
+  <button class="filter-cta-btn" id="filterCtaBtn" type="button" aria-label="Open filters"
+    aria-haspopup="dialog" aria-controls="filterDrawer">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
     </svg>
     Filter
+    {% if active_filter_count > 0 %}
+    <span class="filter-cta-badge" aria-label="{{ active_filter_count }} active filters">
+      {{ active_filter_count }}
+    </span>
+    {% endif %}
   </button>
 </div>
 
@@ -232,12 +291,285 @@ Browse all your personal recipes on Cooksique.
 
 {% block scripts %}
 <script>
-  // Scroll-snap the active category chip into view on page load
-  (function () {
-    var activeChip = document.querySelector('.chip--active');
-    if (activeChip && activeChip.scrollIntoView) {
-      activeChip.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'instant' });
+(function () {
+  'use strict';
+
+  // ── Scroll active chip into view on load ──────────────────────────────
+  var activeChip = document.querySelector('.chip--active');
+  if (activeChip && activeChip.scrollIntoView) {
+    activeChip.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'instant' });
+  }
+
+  // ── DOM refs ──────────────────────────────────────────────────────────
+  var drawer     = document.getElementById('filterDrawer');
+  var scrim      = document.getElementById('filterDrawerScrim');
+  var ctaBtn     = document.getElementById('filterCtaBtn');
+  var closeBtn   = document.getElementById('filterDrawerClose');
+  var applyBtn   = document.getElementById('filterApplyBtn');
+  var track      = document.getElementById('filterPanelsTrack');
+
+  if (!drawer) return; // guard: drawer not rendered
+
+  // ── Panel index constants ─────────────────────────────────────────────
+  var PANEL_MAIN        = 0;
+  var PANEL_CATEGORY    = 1;
+  var PANEL_TAGS        = 2;
+  var PANEL_INGREDIENTS = 3;
+
+  var currentPanel = PANEL_MAIN;
+
+  // ── In-memory filter state (mirrors URL on load, updated by chips) ────
+  // Single-value facets
+  var state = {
+    category:    '{{ selected_category or '' }}',
+    difficulty:  '{{ selected_difficulty or '' }}',
+    time_max:    '{{ selected_time_max or '' }}',
+    // Multi-value facets (arrays of strings)
+    tags:        {{ (selected_tags | tojson) if selected_tags else '[]' }},
+    appliances:  {{ (selected_appliances | tojson) if selected_appliances else '[]' }},
+    utensils:    {{ (selected_utensils | tojson) if selected_utensils else '[]' }},
+    ingredients: {{ (selected_ingredients | tojson) if selected_ingredients else '[]' }},
+  };
+
+  // ── Open / close drawer ───────────────────────────────────────────────
+  function openDrawer() {
+    drawer.classList.add('is-open');
+    scrim.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+    // Always start on main panel
+    slideToPanel(PANEL_MAIN, false);
+    updateScrollFabs();
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    scrim.classList.remove('is-open');
+    document.body.style.overflow = '';
+    ctaBtn && ctaBtn.focus();
+  }
+
+  // ── Scroll down FAB indicator logic ────────────────────────────────────
+  function updateScrollFabs() {
+    document.querySelectorAll('.filter-drawer__panel').forEach(function (panel) {
+      var body = panel.querySelector('.filter-drawer__body, .filter-drawer__sub-body');
+      var fab  = panel.querySelector('.filter-drawer__scroll-fab');
+      if (!body || !fab) return;
+
+      // Check if scrollable downwards with a tiny margin threshold (e.g. 8px)
+      var canScrollDown = (body.scrollHeight - body.scrollTop - body.clientHeight) > 8;
+      fab.classList.toggle('is-visible', canScrollDown);
+    });
+  }
+
+  // Attach scroll listeners to panel bodies
+  document.querySelectorAll('.filter-drawer__body, .filter-drawer__sub-body').forEach(function (body) {
+    body.addEventListener('scroll', updateScrollFabs);
+  });
+
+  // Attach click handler to FABs to scroll down smoothly
+  document.querySelectorAll('.filter-drawer__scroll-fab').forEach(function (fab) {
+    fab.addEventListener('click', function () {
+      var panel = fab.closest('.filter-drawer__panel');
+      var body = panel && panel.querySelector('.filter-drawer__body, .filter-drawer__sub-body');
+      if (body) {
+        body.scrollBy({ top: body.clientHeight * 0.75, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Re-check scroll on window resize
+  window.addEventListener('resize', updateScrollFabs);
+
+  ctaBtn  && ctaBtn.addEventListener('click', openDrawer);
+  closeBtn && closeBtn.addEventListener('click', closeDrawer);
+  scrim   && scrim.addEventListener('click', closeDrawer);
+
+  // Close on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
+  });
+
+  // ── Panel navigation ──────────────────────────────────────────────────
+  function slideToPanel(index, animate) {
+    if (animate === false) {
+      track.style.transition = 'none';
+    } else {
+      track.style.transition = '';
     }
-  })();
+    track.style.transform = 'translateX(-' + (index * 100) + '%)';
+    currentPanel = index;
+    // Re-enable transition after instant jump
+    if (animate === false) {
+      requestAnimationFrame(function () {
+        track.style.transition = '';
+        updateScrollFabs();
+      });
+    } else {
+      setTimeout(updateScrollFabs, 300);
+    }
+  }
+
+  // Drill-down openers
+  var drillCategory    = document.getElementById('drillCategory');
+  var drillTags        = document.getElementById('drillTags');
+  var drillIngredients = document.getElementById('drillIngredients');
+
+  function bindDrill(el, panelIndex) {
+    if (!el) return;
+    function go() { slideToPanel(panelIndex, true); }
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+    });
+  }
+
+  bindDrill(drillCategory,    PANEL_CATEGORY);
+  bindDrill(drillTags,        PANEL_TAGS);
+  bindDrill(drillIngredients, PANEL_INGREDIENTS);
+
+  // Back buttons (Done buttons share the same class)
+  document.querySelectorAll('.filter-back-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      slideToPanel(parseInt(btn.dataset.back || '0', 10), true);
+      updatePreviews();
+    });
+  });
+
+  // ── Chip toggling ─────────────────────────────────────────────────────
+  // single-value facets: time_max, difficulty (toggle off if same value clicked)
+  // multi-value facets: tags, appliances, utensils, ingredients (toggle membership)
+  // category: single-select (radio)
+  var SINGLE_FACETS = ['time_max', 'difficulty', 'category'];
+
+  document.querySelectorAll('.filter-chip[data-facet]').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var facet = chip.dataset.facet;
+      var val   = chip.dataset.value;
+
+      if (SINGLE_FACETS.indexOf(facet) !== -1) {
+        // Radio behaviour: toggle off if already selected
+        var current = state[facet];
+        state[facet] = (current === val) ? '' : val;
+
+        // Deselect all chips in same facet, select this one
+        document.querySelectorAll('.filter-chip[data-facet="' + facet + '"]')
+          .forEach(function (c) {
+            var active = (state[facet] && c.dataset.value === state[facet]);
+            c.classList.toggle('filter-chip--active', active);
+            c.setAttribute('aria-pressed', active ? 'true' : 'false');
+          });
+      } else {
+        // Multi-select toggle
+        var arr = state[facet];
+        var idx = arr.indexOf(val);
+        if (idx === -1) { arr.push(val); } else { arr.splice(idx, 1); }
+        var isActive = arr.indexOf(val) !== -1;
+        chip.classList.toggle('filter-chip--active', isActive);
+        chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      }
+    });
+  });
+
+  // ── Sub-panel Clear buttons ───────────────────────────────────────────
+  function bindSubClear(btnId, facet, isSingle) {
+    var btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      if (isSingle) {
+        state[facet] = '';
+      } else {
+        state[facet] = [];
+      }
+      document.querySelectorAll('.filter-chip[data-facet="' + facet + '"]')
+        .forEach(function (c) {
+          c.classList.remove('filter-chip--active');
+          c.setAttribute('aria-pressed', 'false');
+        });
+    });
+  }
+
+  bindSubClear('categoryClearBtn',    'category',    true);
+  bindSubClear('tagsClearBtn',        'tags',        false);
+  bindSubClear('ingredientsClearBtn', 'ingredients', false);
+
+  // ── Main Header Clear button ─────────────────────────────────────────
+  var drawerClearBtn = document.getElementById('filterDrawerClear');
+  if (drawerClearBtn) {
+    drawerClearBtn.addEventListener('click', function () {
+      state.category = '';
+      state.difficulty = '';
+      state.time_max = '';
+      state.tags = [];
+      state.appliances = [];
+      state.utensils = [];
+      state.ingredients = [];
+
+      document.querySelectorAll('.filter-chip[data-facet]').forEach(function (c) {
+        c.classList.remove('filter-chip--active');
+        c.setAttribute('aria-pressed', 'false');
+      });
+      updatePreviews();
+    });
+  }
+
+  // ── Update preview labels in drill-down rows ──────────────────────────
+  function updatePreviews() {
+    // Category preview — shown in the drill row label itself (updates dynamically)
+    var catPreview = document.getElementById('categoryPreview');
+    if (catPreview) {
+      catPreview.textContent = '';
+      catPreview.className = 'filter-drawer__drill-preview';
+    }
+    // Update the drill row label for category
+    var drillCatLabel = drillCategory && drillCategory.querySelector('.filter-drawer__drill-label');
+    if (drillCatLabel) {
+      if (state.category) {
+        // Find chip with matching value to get display name
+        var catChip = document.querySelector('#categoryChips .filter-chip[data-value="' + state.category + '"]');
+        drillCatLabel.textContent = catChip ? catChip.textContent.trim() : state.category;
+      } else {
+        drillCatLabel.textContent = 'Any category';
+      }
+    }
+
+    // Tags preview count
+    var tagsPreview = document.getElementById('tagsPreview');
+    if (tagsPreview) {
+      var tCount = state.tags.length;
+      tagsPreview.textContent = tCount > 0 ? tCount + ' selected' : '';
+      tagsPreview.className = 'filter-drawer__drill-preview' + (tCount > 0 ? ' filter-drawer__drill-preview--active' : '');
+    }
+
+    // Ingredients preview count
+    var ingrPreview = document.getElementById('ingredientsPreview');
+    if (ingrPreview) {
+      var iCount = state.ingredients.length;
+      ingrPreview.textContent = iCount > 0 ? iCount + ' selected' : '';
+      ingrPreview.className = 'filter-drawer__drill-preview' + (iCount > 0 ? ' filter-drawer__drill-preview--active' : '');
+    }
+  }
+
+  // ── Apply Filters — build URL and navigate ────────────────────────────
+  applyBtn && applyBtn.addEventListener('click', function () {
+    var params = new URLSearchParams();
+
+    if (state.category)    params.set('category',    state.category);
+    if (state.difficulty)  params.set('difficulty',  state.difficulty);
+    if (state.time_max)    params.set('time_max',     state.time_max);
+    if (state.tags.length)        params.set('tags',        state.tags.join(','));
+    if (state.appliances.length)  params.set('appliances',  state.appliances.join(','));
+    if (state.utensils.length)    params.set('utensils',    state.utensils.join(','));
+    if (state.ingredients.length) params.set('ingredients', state.ingredients.join(','));
+
+    // Preserve existing search query if present
+    var q = new URLSearchParams(window.location.search).get('q');
+    if (q) params.set('q', q);
+
+    var qs = params.toString();
+    window.location.href = window.location.pathname + (qs ? '?' + qs : '');
+  });
+
+})();
 </script>
 {% endblock %}

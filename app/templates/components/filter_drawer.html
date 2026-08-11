@@ -1,0 +1,389 @@
+{# ============================================================ #}
+{# filter_drawer.html — Filter bottom drawer component          #}
+{# Expects from route: categories, selected_category,           #}
+{#   tags, selected_tags (list),                                #}
+{#   ingredients_list, selected_ingredients (list),             #}
+{#   appliances_list, selected_appliances (list),               #}
+{#   utensils_list, selected_utensils (list),                   #}
+{#   selected_difficulty, selected_time_max (int|None),         #}
+{#   active_filter_count                                        #}
+{# ============================================================ #}
+
+{# ── Scrim ──────────────────────────────────────────────────── #}
+<div class="filter-drawer-scrim" id="filterDrawerScrim" aria-hidden="true"></div>
+
+{# ── Bottom drawer ──────────────────────────────────────────── #}
+<aside class="filter-drawer" id="filterDrawer" aria-label="Filter recipes" role="dialog"
+  aria-modal="true">
+
+  {# Drag handle #}
+  <div class="filter-drawer__handle" aria-hidden="true"></div>
+
+  {# Drawer header #}
+  <div class="filter-drawer__header">
+    <span class="filter-drawer__title">Filter Recipes</span>
+    <div class="filter-drawer__header-actions">
+      <button class="filter-drawer__clear-btn" id="filterDrawerClear" type="button">
+        Clear
+      </button>
+      <button class="filter-drawer__close" id="filterDrawerClose" type="button"
+        aria-label="Close filters">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  {# ── Panel track (4 panels: main + category + tags + ingredients) ── #}
+  <div class="filter-drawer__panels-wrapper">
+    <div class="filter-drawer__panels-track" id="filterPanelsTrack">
+
+      {# ══════════════════════════════════════════════════════════ #}
+      {# PANEL 0 — Main filter panel                               #}
+      {# ══════════════════════════════════════════════════════════ #}
+      <div class="filter-drawer__panel" id="filterPanelMain">
+
+        <div class="filter-drawer__body">
+
+          {# ── Cooking Time ────────────────────────────────── #}
+          <div class="filter-drawer__section">
+            <p class="filter-drawer__section-label">Cooking Time</p>
+            <div class="filter-drawer__chips-row">
+              <button
+                type="button"
+                class="filter-chip{% if selected_time_max == 20 %} filter-chip--active{% endif %}"
+                data-facet="time_max"
+                data-value="20"
+                aria-pressed="{{ 'true' if selected_time_max == 20 else 'false' }}">
+                &#x2264; 20 min
+              </button>
+            </div>
+          </div>
+
+          {# ── Difficulty ──────────────────────────────────── #}
+          <div class="filter-drawer__section">
+            <p class="filter-drawer__section-label">Difficulty</p>
+            <div class="filter-drawer__chips-row">
+              {% for level in [('easy', 'Easy'), ('medium', 'Medium'), ('hard', 'Hard')] %}
+              <button
+                type="button"
+                class="filter-chip{% if selected_difficulty == level[0] %} filter-chip--active{% endif %}"
+                data-facet="difficulty"
+                data-value="{{ level[0] }}"
+                aria-pressed="{{ 'true' if selected_difficulty == level[0] else 'false' }}">
+                {{ level[1] }}
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+
+          {# ── Appliances ──────────────────────────────────────── #}
+          {% if appliances_list %}
+          <div class="filter-drawer__section">
+            <p class="filter-drawer__section-label">Appliances</p>
+            <div class="filter-drawer__chips-row filter-drawer__chips-row--cards">
+              {% for appl in appliances_list %}
+              <button
+                type="button"
+                class="filter-chip filter-chip--card{% if appl.id | string in selected_appliances %} filter-chip--active{% endif %}"
+                data-facet="appliances"
+                data-value="{{ appl.id }}"
+                aria-pressed="{{ 'true' if appl.id | string in selected_appliances else 'false' }}">
+                {% if appl.icon %}
+                <span class="filter-chip__icon" aria-hidden="true">{{ appl.icon | render_icon }}</span>
+                {% endif %}
+                {{ appl.name }}
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# ── Utensils ────────────────────────────────────────── #}
+          {% if utensils_list %}
+          <div class="filter-drawer__section">
+            <p class="filter-drawer__section-label">Utensils</p>
+            <div class="filter-drawer__chips-row filter-drawer__chips-row--cards">
+              {% for ut in utensils_list %}
+              <button
+                type="button"
+                class="filter-chip filter-chip--card{% if ut.id | string in selected_utensils %} filter-chip--active{% endif %}"
+                data-facet="utensils"
+                data-value="{{ ut.id }}"
+                aria-pressed="{{ 'true' if ut.id | string in selected_utensils else 'false' }}">
+                {% if ut.icon %}
+                <span class="filter-chip__icon" aria-hidden="true">{{ ut.icon | render_icon }}</span>
+                {% endif %}
+                {{ ut.name }}
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# ── Category (drill-down) ────────────────────────── #}
+          {% if categories %}
+          <div class="filter-drawer__section">
+            <p class="filter-drawer__section-label">Category</p>
+            <div class="filter-drawer__drill-row" id="drillCategory" role="button"
+              tabindex="0" aria-label="Select category">
+              <span class="filter-drawer__drill-label">
+                {% if selected_category %}
+                  {% for cat in categories %}{% if cat.slug == selected_category %}{{ cat.name }}{% endif %}{% endfor %}
+                {% else %}
+                  Any category
+                {% endif %}
+              </span>
+              <span
+                class="filter-drawer__drill-preview{% if selected_category %} filter-drawer__drill-preview--active{% endif %}"
+                id="categoryPreview">
+              </span>
+              <span class="filter-drawer__drill-arrow" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
+            </div>
+          </div>
+          {% endif %}
+
+          {# ── Tags (drill-down) ───────────────────────────── #}
+          {% if tags %}
+          <div class="filter-drawer__section">
+            <p class="filter-drawer__section-label">Tags</p>
+            <div class="filter-drawer__drill-row" id="drillTags" role="button"
+              tabindex="0" aria-label="Select tags">
+              <span class="filter-drawer__drill-label">Any tag</span>
+              <span
+                class="filter-drawer__drill-preview{% if selected_tags %} filter-drawer__drill-preview--active{% endif %}"
+                id="tagsPreview">
+                {% if selected_tags %}{{ selected_tags | length }} selected{% endif %}
+              </span>
+              <span class="filter-drawer__drill-arrow" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
+            </div>
+          </div>
+          {% endif %}
+
+          {# ── Ingredients (drill-down) ─────────────────────── #}
+          {% if ingredients_list %}
+          <div class="filter-drawer__section">
+            <p class="filter-drawer__section-label">Ingredients</p>
+            <div class="filter-drawer__drill-row" id="drillIngredients" role="button"
+              tabindex="0" aria-label="Select ingredients">
+              <span class="filter-drawer__drill-label">Any ingredient</span>
+              <span
+                class="filter-drawer__drill-preview{% if selected_ingredients %} filter-drawer__drill-preview--active{% endif %}"
+                id="ingredientsPreview">
+                {% if selected_ingredients %}{{ selected_ingredients | length }} selected{% endif %}
+              </span>
+              <span class="filter-drawer__drill-arrow" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
+            </div>
+          </div>
+          {% endif %}
+
+          <div style="height: var(--space-4);" aria-hidden="true"></div>
+
+        </div>{# /filter-drawer__body #}
+
+        <button class="filter-drawer__scroll-fab" type="button" aria-label="Scroll down">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        <div class="filter-drawer__footer">
+          <button class="filter-drawer__apply-btn" id="filterApplyBtn" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Apply Filters
+          </button>
+        </div>
+
+      </div>{# /PANEL 0 #}
+
+
+      {# ══════════════════════════════════════════════════════════ #}
+      {# PANEL 1 — Category sub-panel (single-select)              #}
+      {# ══════════════════════════════════════════════════════════ #}
+      <div class="filter-drawer__panel" id="filterPanelCategory">
+
+        <div class="filter-drawer__sub-header">
+          <div class="filter-drawer__sub-left">
+            <button class="filter-drawer__back-btn filter-back-btn" type="button"
+              data-back="0" aria-label="Back to filters">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <span class="filter-drawer__sub-title">Select Category</span>
+          </div>
+          <button class="filter-drawer__sub-clear" id="categoryClearBtn" type="button">
+            Clear
+          </button>
+        </div>
+
+        <div class="filter-drawer__sub-body">
+          <div class="filter-drawer__sub-chips" id="categoryChips">
+            {% for cat in categories %}
+            <button
+              type="button"
+              class="filter-chip{% if selected_category == cat.slug %} filter-chip--active{% endif %}"
+              data-facet="category"
+              data-value="{{ cat.slug }}"
+              aria-pressed="{{ 'true' if selected_category == cat.slug else 'false' }}">
+              {% if cat.icon %}<span class="filter-chip__icon" aria-hidden="true">{{ cat.icon | render_icon }}</span>{% endif %}
+              {{ cat.name }}
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+        <button class="filter-drawer__scroll-fab" type="button" aria-label="Scroll down">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        <div class="filter-drawer__sub-footer">
+          <button class="filter-drawer__done-btn filter-back-btn" type="button"
+            data-back="0">
+            Done
+          </button>
+        </div>
+
+      </div>{# /PANEL 1 #}
+
+
+      {# ══════════════════════════════════════════════════════════ #}
+      {# PANEL 2 — Tags sub-panel (multi-select, OR logic)         #}
+      {# ══════════════════════════════════════════════════════════ #}
+      <div class="filter-drawer__panel" id="filterPanelTags">
+
+        <div class="filter-drawer__sub-header">
+          <div class="filter-drawer__sub-left">
+            <button class="filter-drawer__back-btn filter-back-btn" type="button"
+              data-back="0" aria-label="Back to filters">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <span class="filter-drawer__sub-title">Select Tags</span>
+          </div>
+          <button class="filter-drawer__sub-clear" id="tagsClearBtn" type="button">
+            Clear
+          </button>
+        </div>
+
+        <div class="filter-drawer__sub-body">
+          <div class="filter-drawer__sub-chips" id="tagChips">
+            {% for tag in tags %}
+            <button
+              type="button"
+              class="filter-chip{% if tag.slug in selected_tags %} filter-chip--active{% endif %}"
+              data-facet="tags"
+              data-value="{{ tag.slug }}"
+              aria-pressed="{{ 'true' if tag.slug in selected_tags else 'false' }}">
+              {{ tag.name }}
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+        <button class="filter-drawer__scroll-fab" type="button" aria-label="Scroll down">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        <div class="filter-drawer__sub-footer">
+          <button class="filter-drawer__done-btn filter-back-btn" type="button"
+            data-back="0">
+            Done
+          </button>
+        </div>
+
+      </div>{# /PANEL 2 #}
+
+
+      {# ══════════════════════════════════════════════════════════ #}
+      {# PANEL 3 — Ingredients sub-panel (multi-select, alpha)     #}
+      {# ══════════════════════════════════════════════════════════ #}
+      <div class="filter-drawer__panel" id="filterPanelIngredients">
+
+        <div class="filter-drawer__sub-header">
+          <div class="filter-drawer__sub-left">
+            <button class="filter-drawer__back-btn filter-back-btn" type="button"
+              data-back="0" aria-label="Back to filters">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <span class="filter-drawer__sub-title">Select Ingredients</span>
+          </div>
+          <button class="filter-drawer__sub-clear" id="ingredientsClearBtn" type="button">
+            Clear
+          </button>
+        </div>
+
+        <div class="filter-drawer__sub-body">
+          <div class="filter-drawer__sub-chips" id="ingredientChips">
+            {% for ingr in ingredients_list %}
+            <button
+              type="button"
+              class="filter-chip{% if ingr.slug in selected_ingredients %} filter-chip--active{% endif %}"
+              data-facet="ingredients"
+              data-value="{{ ingr.slug }}"
+              aria-pressed="{{ 'true' if ingr.slug in selected_ingredients else 'false' }}">
+              {{ ingr.name }}
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+        <button class="filter-drawer__scroll-fab" type="button" aria-label="Scroll down">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        <div class="filter-drawer__sub-footer">
+          <button class="filter-drawer__done-btn filter-back-btn" type="button"
+            data-back="0">
+            Done
+          </button>
+        </div>
+
+      </div>{# /PANEL 3 #}
+
+    </div>{# /filter-drawer__panels-track #}
+  </div>{# /filter-drawer__panels-wrapper #}
+
+</aside>{# /filter-drawer #}

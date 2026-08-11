@@ -13,6 +13,10 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
 
+    from .utils import render_icon, remove_filter
+    app.jinja_env.filters["render_icon"] = render_icon
+    app.jinja_env.filters["remove_filter"] = remove_filter
+
     from .blueprints.main.routes import main_bp
     from .blueprints.recipes.routes import recipes_bp
 

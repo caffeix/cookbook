@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import String
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -18,7 +18,7 @@ class Appliance(TimestampMixin, db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(150), nullable=False)
-    icon: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    icon: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     recipe_links: Mapped[list[RecipeAppliance]] = relationship(
         "RecipeAppliance", back_populates="appliance", cascade="all, delete-orphan"

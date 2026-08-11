@@ -11,13 +11,48 @@ from .models import (
 )
 from .utils import slugify
 
+from sqlalchemy import text
+
 seed_bp = Blueprint("seed", __name__)
+
+_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+
+ICON_MAP = {
+    "Air Fryer": "air-fryer",
+    "Frying pan": "frying-pan",
+    "Stovetop": "stovetop",
+    "Oven": "oven",
+    "Blender": "blender",
+    "Whisk": "whisk",
+    "Small pot": "small-pot",
+    "Spatula": "spatula",
+    "Scale": "scale",
+    "Peeler": "peeler",
+}
+
+
+def _update_icons_and_tables():
+    """Populate short icon keys on existing DB records."""
+    appliances = db.session.scalars(db.select(Appliance)).all()
+    for item in appliances:
+        if item.name in ICON_MAP:
+            item.icon = ICON_MAP[item.name]
+
+    utensils = db.session.scalars(db.select(Utensil)).all()
+    for item in utensils:
+        if item.name in ICON_MAP:
+            item.icon = ICON_MAP[item.name]
+
+    db.session.commit()
+
 
 @seed_bp.cli.command("run")
 def seed():
     """Populate the database with sample data for local development."""
+    _update_icons_and_tables()
+
     if db.session.execute(db.select(Recipe)).scalars().first():
-        click.echo("Database already has data — skipping seed.")
+        click.echo("Database already has data — updated SVG icons for appliances and utensils.")
         return
 
     garlic = Ingredient(name="Garlic", slug=slugify("Garlic"))
@@ -73,19 +108,24 @@ def seed():
     inst3 = Instruction(step=3, description="Brown the beef in a pan with seasonings.", note_text="Drain excess fat if needed.")
     inst4 = Instruction(step=4, description="Fill taco shells with beef and top with shredded cheddar.", note_text="Serve hot with fresh salsa.")
 
-    air_fryer = Appliance(name="Air Fryer")
-    whisk = Utensil(name="Whisk")
-    small_pot = Utensil(name="Small pot")
-    frying_pan = Appliance(name="Frying pan")
-    spatula = Utensil(name="Spatula")
-    stovetop = Appliance(name="Stovetop")
+    air_fryer = Appliance(name="Air Fryer", icon="air-fryer")
+    frying_pan = Appliance(name="Frying pan", icon="frying-pan")
+    stovetop = Appliance(name="Stovetop", icon="stovetop")
+    oven = Appliance(name="Oven", icon="oven")
+    blender = Appliance(name="Blender", icon="blender")
+
+    whisk = Utensil(name="Whisk", icon="whisk")
+    small_pot = Utensil(name="Small pot", icon="small-pot")
+    spatula = Utensil(name="Spatula", icon="spatula")
+    scale = Utensil(name="Scale", icon="scale")
+    peeler = Utensil(name="Peeler", icon="peeler")
 
     db.session.add_all([
         garlic, olive_oil, spaghetti, fusilli, flour, milk, oat_milk, egg, ground_beef, taco_shell, cheddar,
         breakfast_tag, dinner_tag,
         italian_category, american_category, mexican_category,
         recipe, pancake_recipe, tacos_recipe,
-        air_fryer, whisk, small_pot, frying_pan, spatula, stovetop,
+        air_fryer, whisk, small_pot, frying_pan, spatula, stovetop, oven, blender, scale, peeler,
         pasta_inst1, pasta_inst2, pasta_inst3, inst1, inst2, inst3, inst4
     ])
     db.session.flush()  # assigns IDs before referencing them
