@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if selected_category %}
+{{ selected_category | title }} Recipes — Cooksique
+{% else %}
+All Recipes — Cooksique
+{% endif %}
+{% endblock %}
+
+{% block meta_description %}
+{% if selected_category %}
+Browse {{ selected_category | title }} recipes on Cooksique.
+{% else %}
+Browse all your personal recipes on Cooksique.
+{% endif %}
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/recipes.css') }}">
+{% endblock %}
+
+{% block content %}
+
+{# ── Search bar ───────────────────────────────────────────────────────── #}
+<div class="search-wrapper">
+  <form action="{{ url_for('recipes.list_recipes') }}" method="get" role="search">
+    {# Preserve active category filter when searching #}
+    {% if selected_category %}
+    <input type="hidden" name="category" value="{{ selected_category }}">
+    {% endif %}
+    <div class="search-bar">
+      <span class="search-bar__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </span>
+      <input class="search-bar__input" type="search" name="q" placeholder="Search a recipe…"
+        value="{{ request.args.get('q', '') }}" autocomplete="off" aria-label="Search recipes">
+    </div>
+  </form>
+</div>
+
+{# ── Category filter chip bar (only displayed when filters are applied) ─────────────────── #}
+{% if selected_category or request.args.get('q') %}
+{% if categories %}
+<div class="filter-row-wrapper" aria-label="Filter by category">
+  <div class="filter-row" role="list">
+
+    {# "Clear" text button #}
+    <button class="filter-row__clear" type="button" aria-label="Clear category filter"
+      onclick="window.location='{{ url_for('recipes.list_recipes') }}'">
+      Clear
+    </button>
+
+    {# Chips sub-row (horizontally scrollable, no scrollbar) #}
+    <div class="filter-row__chips no-scrollbar">
+
+      {# "All" chip #}
+      <a href="{{ url_for('recipes.list_recipes') }}" class="chip{% if not selected_category %} chip--active{% endif %}"
+        role="listitem" aria-current="{% if not selected_category %}true{% endif %}">
+        All
+      </a>
+
+      {# Per-category chips #}
+      {% for cat in categories %}
+      <a href="{{ url_for('recipes.list_recipes', category=cat.slug) }}"
+        class="chip{% if selected_category == cat.slug %} chip--active{% endif %}" role="listitem"
+        aria-current="{% if selected_category == cat.slug %}true{% endif %}">
+        {% if cat.icon %}<span aria-hidden="true">{{ cat.icon }}</span>{% endif %}
+        {{ cat.name }}
+      </a>
+      {% endfor %}
+
+    </div>{# /filter-row__chips #}
+  </div>
+</div>
+{% endif %}
+{% endif %}
+
+{# ── Recipe list ──────────────────────────────────────────────────────── #}
+<div class="recipe-list" aria-label="Recipe list">
+
+  {% for recipe in recipes %}
+
+  <a href="/recipes/{{ recipe.id }}" class="recipe-card" aria-label="{{ recipe.title }}">
+
+    {# Card image #}
+    <div class="recipe-card__image">
+      {% if recipe.categories %}
+      {% set primary_cat = recipe.categories[0] %}
+      <span class="recipe-card__category-badge" title="{{ primary_cat.name }}">
+        {% if primary_cat.icon %}<span aria-hidden="true">{{ primary_cat.icon }}</span>{% endif %}
+        {{ primary_cat.name }}
+      </span>
+      {% endif %}
+      {% if recipe.picture %}
+      <img src="{{ url_for('static', filename=recipe.picture) }}" alt="{{ recipe.title }}" loading="lazy"
+        decoding="async">
+      {% else %}
+      {# Inline SVG placeholder — a bowl with steam, brand teal #}
+      <svg class="recipe-card__placeholder" xmlns="http://www.w3.org/2000/svg" width="52" height="52"
+        viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true">
+        {# Bowl #}
+        <path d="M8 26h32" />
+        <path d="M10 26c0 9 4.5 14 14 14s14-5 14-14" />
+        {# Steam curls #}
+        <path d="M17 20c0-4 3-4 3-8" />
+        <path d="M24 18c0-4 3-4 3-8" />
+        <path d="M31 20c0-4 3-4 3-8" />
+      </svg>
+      {% endif %}
+    </div>
+
+    {# Card body #}
+    <div class="recipe-card__body">
+
+      <div class="recipe-card__header">
+        {# Meta badges (above title: time, difficulty, tags) #}
+        <div class="recipe-card__meta" aria-label="Recipe details">
+          {% if recipe.cook_time %}
+          <span class="badge badge--time" title="{{ recipe.cook_time }} minutes">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            {{ recipe.cook_time }} min
+          </span>
+          {% endif %}
+
+          {% if recipe.difficulty %}
+          {% set diff = recipe.difficulty | lower %}
+          <span class="badge badge--{{ diff }}">
+            {{ recipe.difficulty | title }}
+          </span>
+          {% endif %}
+
+          {% for tag in recipe.tags[:3] %}
+          <span class="badge badge--tag">{{ tag.name }}</span>
+          {% endfor %}
+          {% if recipe.tags | length > 3 %}
+          <span class="badge badge--tag">+{{ recipe.tags | length - 3 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="recipe-card__top">
+          <h2 class="recipe-card__title">{{ recipe.title }}</h2>
+        </div>
+      </div>
+
+      {% if recipe.appliances or recipe.utensils %}
+      <div class="recipe-card__footer">
+        <div class="recipe-card__divider"></div>
+        <div class="recipe-card__tools-row">
+          <div class="recipe-card__tools" aria-label="Appliances and utensils">
+            {% for app in recipe.appliances %}
+            <span class="badge badge--tool">
+              {% if app.icon %}<span aria-hidden="true">{{ app.icon }}</span>{% endif %}
+              {{ app.name }}
+            </span>
+            {% endfor %}
+            {% for ut in recipe.utensils %}
+            <span class="badge badge--tool">
+              {% if ut.icon %}<span aria-hidden="true">{{ ut.icon }}</span>{% endif %}
+              {{ ut.name }}
+            </span>
+            {% endfor %}
+          </div>
+          <span class="recipe-card__arrow" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </a>
+
+  {% else %}
+
+  {# ── Empty state ──────────────────────────────────────────────────── #}
+  <div class="empty-state" role="status" aria-live="polite">
+    <svg class="empty-state__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"
+      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M8 26h32" />
+      <path d="M10 26c0 9 4.5 14 14 14s14-5 14-14" />
+      <path d="M17 20c0-4 3-4 3-8" />
+      <path d="M24 18c0-4 3-4 3-8" />
+      <path d="M31 20c0-4 3-4 3-8" />
+    </svg>
+
+    {% if selected_category %}
+    <p class="empty-state__title">No {{ selected_category | title }} recipes yet</p>
+    <p class="empty-state__subtitle">
+      Try a different category or browse all your recipes.
+    </p>
+    <a href="{{ url_for('recipes.list_recipes') }}" class="empty-state__cta">
+      View all recipes
+    </a>
+    {% else %}
+    <p class="empty-state__title">Your cookbook is empty</p>
+    <p class="empty-state__subtitle">
+      Add your first recipe and start building your collection.
+    </p>
+    {% endif %}
+  </div>
+
+  {% endfor %}
+
+</div>{# /recipe-list #}
+
+{# ── "Filter" CTA button ───────────────────────────────────────────────── #}
+<div class="filter-cta-wrapper">
+  <button class="filter-cta-btn" type="button" aria-label="Open filters">
+    {# Plus/filter icon #}
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+    </svg>
+    Filter
+  </button>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Scroll-snap the active category chip into view on page load
+  (function () {
+    var activeChip = document.querySelector('.chip--active');
+    if (activeChip && activeChip.scrollIntoView) {
+      activeChip.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'instant' });
+    }
+  })();
+</script>
+{% endblock %}

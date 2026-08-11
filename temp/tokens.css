@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..800;1,300..800&display=swap');
+@import 'tailwindcss';
+
+@layer base {
+    :root {
+        /* Font */
+        --font-montserrat: 'Montserrat', sans-serif;
+
+        /* Light Theme Color Tokens */
+        --color-bg: #EAF3F1;
+        --color-surface: #FDFEFE;
+        --color-border: #D3E6E2;
+        --color-border-strong: #B7D3CD;
+
+        --color-text-primary: #0F172A;
+        --color-text-secondary: #475569;
+        --color-text-muted: #94A3B8;
+
+        --color-accent-bg: #CCFBF1;
+        --color-accent-text: #0F766E;
+        --color-accent-hover: #0F766E;
+        --color-accent-hover-text: #5EEAD4;
+
+        --color-secondary-bg: #FF6B6B;
+        --color-secondary-text: #FFE8E8;
+        --color-secondary-hover: #E85555;
+
+        --color-easy-bg: #EFF6E6;
+        --color-easy-text: #557C2E;
+
+        --color-medium-bg: #FEF3C7;
+        --color-medium-text: #B45309;
+
+        --color-hard-bg: #FEE2E2;
+        --color-hard-text: #B91C1C;
+
+        --color-category-bg: #DBEAFE;
+        --color-category-text: #1D4ED8;
+
+        --color-tag-bg: #EDE9FE;
+        --color-tag-text: #6D28D9;
+
+        --color-time-bg: #FFEDD5;
+        --color-time-text: #C2410C;
+
+        --color-appliance-bg: #E2E8F0;
+        --color-appliance-text: #334155;
+    }
+
+    .dark {
+        /* Dark Theme Color Tokens */
+        --color-bg: #0B1615;
+        --color-surface: #142322;
+        --color-border: #223432;
+        --color-border-strong: #2E4644;
+
+        --color-text-primary: #EFF6F5;
+        --color-text-secondary: #94A9A6;
+        --color-text-muted: #7E9793;
+
+        --color-accent-bg: #134E4A;
+        --color-accent-text: #5EEAD4;
+        --color-accent-hover: #0F766E;
+        --color-accent-hover-text: #5EEAD4;
+
+        /* Secondary color token in Dark Mode updated to #ee3b68 */
+        --color-secondary-bg: #ee3b68;
+        --color-secondary-text: #FFFFFF;
+        --color-secondary-hover: #f0527b;
+
+        --color-easy-bg: #2F4020;
+        --color-easy-text: #BEE38A;
+
+        --color-medium-bg: #78350F;
+        --color-medium-text: #FCD34D;
+
+        --color-hard-bg: #7F1D1D;
+        --color-hard-text: #FCA5A5;
+
+        --color-category-bg: #1E3A8A;
+        --color-category-text: #93C5FD;
+
+        --color-tag-bg: #4C1D95;
+        --color-tag-text: #C4B5FD;
+
+        --color-time-bg: #7C2D12;
+        --color-time-text: #FDBA74;
+
+        --color-appliance-bg: #334155;
+        --color-appliance-text: #E2E8F0;
+    }
+
+    body {
+        font-family: var(--font-montserrat);
+        background-color: var(--color-bg);
+        color: var(--color-text-primary);
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+}
+
+/* Custom overlay scrollbar styling that overlays content instead of taking separate layout box space */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Floating overlay scrollbars for containers */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}

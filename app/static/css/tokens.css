@@ -1,0 +1,244 @@
+/* ============================================================
+   tokens.css — Design System Foundation
+   Cookbook App · No framework dependencies
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..800;1,300..800&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Light theme (default) ──────────────────────────────────────────────── */
+:root {
+  /* Default font across the app */
+  --font-sans: 'Montserrat', 'Inter', system-ui, sans-serif;
+  --font-inter: 'Inter', system-ui, sans-serif;
+
+  /* --- Type scale --- */
+  --text-xs: 0.6875rem;
+  /* 11px — badges, micro labels  */
+  --text-sm: 0.875rem;
+  /* 14px — body, search placeholder */
+  --text-base: 1rem;
+  /* 16px — default body           */
+  --text-card-title: 0.9375rem;
+  /* 15px — recipe card titles     */
+  --text-detail-title: 1.375rem;
+  /* 22px — recipe detail h1       */
+  --text-app-title: 1.25rem;
+  /* 20px — "Cooksique" nav brand  */
+
+  /* --- Font weights --- */
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-slightlybold: 550;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* --- Leading --- */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+
+  /* --- Spacing (4px unit scale) --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+
+  /* --- Border radius --- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 32px;
+  --radius-full: 999px;
+
+  /* --- Shadows --- */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, .04), 0 1px 3px rgba(0, 0, 0, .04);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, .06), 0 2px 4px rgba(0, 0, 0, .05);
+  --shadow-app: 0 25px 50px rgba(0, 0, 0, .18);
+
+  /* --- Colors: surfaces & borders --- */
+  --color-bg: #EAF3F1;
+  --color-surface: #FDFEFE;
+  --color-border: #D3E6E2;
+  --color-border-strong: #B7D3CD;
+
+  /* --- Colors: text --- */
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+
+  /* --- Colors: accent (teal) --- */
+  --color-accent-bg: #CCFBF1;
+  --color-accent-text: #0F766E;
+  --color-accent-hover: #0F766E;
+  --color-accent-hover-text: #5EEAD4;
+
+  /* --- Colors: secondary (coral) --- */
+  --color-secondary-bg: #FF6B6B;
+  --color-secondary-text: #FFE8E8;
+  --color-secondary-hover: #E85555;
+
+  /* --- Colors: difficulty --- */
+  --color-easy-bg: #EFF6E6;
+  --color-easy-text: #557C2E;
+  --color-medium-bg: #FEF3C7;
+  --color-medium-text: #B45309;
+  --color-hard-bg: #FEE2E2;
+  --color-hard-text: #B91C1C;
+
+  /* --- Colors: entity chips --- */
+  --color-category-bg: #DBEAFE;
+  --color-category-text: #1D4ED8;
+  --color-tag-bg: #EDE9FE;
+  --color-tag-text: #6D28D9;
+  --color-time-bg: #FFEDD5;
+  --color-time-text: #C2410C;
+  --color-appliance-bg: #E2E8F0;
+  --color-appliance-text: #334155;
+}
+
+/* ── Dark theme (.dark on <html>) ──────────────────────────────────────── */
+.dark {
+  --color-bg: #0B1615;
+  --color-surface: #142322;
+  --color-border: #223432;
+  --color-border-strong: #2E4644;
+
+  --color-text-primary: #EFF6F5;
+  --color-text-secondary: #94A9A6;
+  --color-text-muted: #7E9793;
+
+  --color-accent-bg: #134E4A;
+  --color-accent-text: #5EEAD4;
+  --color-accent-hover: #0F766E;
+  --color-accent-hover-text: #5EEAD4;
+
+  --color-secondary-bg: #EE3B68;
+  --color-secondary-text: #FFFFFF;
+  --color-secondary-hover: #F0527B;
+
+  --color-easy-bg: #2F4020;
+  --color-easy-text: #BEE38A;
+  --color-medium-bg: #78350F;
+  --color-medium-text: #FCD34D;
+  --color-hard-bg: #7F1D1D;
+  --color-hard-text: #FCA5A5;
+
+  --color-category-bg: #1E3A8A;
+  --color-category-text: #93C5FD;
+  --color-tag-bg: #4C1D95;
+  --color-tag-text: #C4B5FD;
+  --color-time-bg: #7C2D12;
+  --color-time-text: #FDBA74;
+  --color-appliance-bg: #334155;
+  --color-appliance-text: #E2E8F0;
+}
+
+/* ── Global resets ──────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 110%;
+  /* Smooth dark/light transitions at html level */
+  transition: color-scheme 0.2s;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+}
+
+input,
+textarea {
+  font: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* ── Dark-mode icon toggling ────────────────────────────────────────────── */
+.icon-moon {
+  display: block;
+}
+
+.icon-sun {
+  display: none;
+}
+
+.dark .icon-moon {
+  display: none;
+}
+
+.dark .icon-sun {
+  display: block;
+}
+
+/* ── Scrollbar utilities ────────────────────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
