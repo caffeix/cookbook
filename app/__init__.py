@@ -14,13 +14,12 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
 
     from .blueprints.main.routes import main_bp
+    from .blueprints.recipes.routes import recipes_bp
+
     app.register_blueprint(main_bp)
+    app.register_blueprint(recipes_bp, url_prefix="", strict_slashes=False)
     app.register_blueprint(seed_bp)
 
-    from . import models
-
-    @app.route("/")
-    def index():
-        return "Hello World"
+    from . import models  # noqa: F401 — ensures all models are registered with SQLAlchemy
 
     return app
