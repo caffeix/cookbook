@@ -31,9 +31,27 @@ Browse all your personal recipes on Cooksique.
 {# ── Search bar ───────────────────────────────────────────────────────── #}
 <div class="search-wrapper">
   <form action="{{ url_for('recipes.list_recipes') }}" method="get" role="search">
-    {# Preserve active category filter when searching #}
+    {# Preserve active filters when searching #}
     {% if selected_category %}
     <input type="hidden" name="category" value="{{ selected_category }}">
+    {% endif %}
+    {% if selected_difficulty %}
+    <input type="hidden" name="difficulty" value="{{ selected_difficulty }}">
+    {% endif %}
+    {% if selected_time_max %}
+    <input type="hidden" name="time_max" value="{{ selected_time_max }}">
+    {% endif %}
+    {% if selected_tags %}
+    <input type="hidden" name="tags" value="{{ selected_tags | join(',') }}">
+    {% endif %}
+    {% if selected_appliances %}
+    <input type="hidden" name="appliances" value="{{ selected_appliances | join(',') }}">
+    {% endif %}
+    {% if selected_utensils %}
+    <input type="hidden" name="utensils" value="{{ selected_utensils | join(',') }}">
+    {% endif %}
+    {% if selected_ingredients %}
+    <input type="hidden" name="ingredients" value="{{ selected_ingredients | join(',') }}">
     {% endif %}
     <div class="search-bar">
       <span class="search-bar__icon" aria-hidden="true">
@@ -66,6 +84,14 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
         <line x1="18" y1="6" x2="6" y2="18" />
         <line x1="6" y1="6" x2="18" y2="18" />
       </svg>{% endset %}
+
+      {% if request.args.get('q') %}
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('q', request.args.get('q')) }}"
+        class="chip chip--active" role="listitem" title="Remove search filter">
+        <span>"{{ request.args.get('q') }}"</span>
+        {{ close_svg | safe }}
+      </a>
+      {% endif %}
 
       {% if selected_category %}
       {% for cat in categories %}{% if cat.slug == selected_category %}
@@ -142,8 +168,7 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
       Clear
     </button>
   </div>
-</div>
-{% endif %}
+</div>{% endif %}
 
 {# ── Recipe list ──────────────────────────────────────────────────────── #}
 <div class="recipe-list" aria-label="Recipe list">
@@ -260,13 +285,29 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
       <path d="M31 20c0-4 3-4 3-8" />
     </svg>
 
-    {% if selected_category %}
+    {% if request.args.get('q') %}
+    <p class="empty-state__title">No recipes found matching "{{ request.args.get('q') }}"</p>
+    <p class="empty-state__subtitle">
+      Try checking for typos or searching with different keywords or filters.
+    </p>
+    <a href="{{ url_for('recipes.list_recipes') }}" class="empty-state__cta">
+      View all recipes
+    </a>
+    {% elif selected_category %}
     <p class="empty-state__title">No {{ selected_category | title }} recipes yet</p>
     <p class="empty-state__subtitle">
       Try a different category or browse all your recipes.
     </p>
     <a href="{{ url_for('recipes.list_recipes') }}" class="empty-state__cta">
       View all recipes
+    </a>
+    {% elif has_any_filter %}
+    <p class="empty-state__title">No matching recipes found</p>
+    <p class="empty-state__subtitle">
+      Try adjusting or clearing your filters to find what you're looking for.
+    </p>
+    <a href="{{ url_for('recipes.list_recipes') }}" class="empty-state__cta">
+      Clear all filters
     </a>
     {% else %}
     <p class="empty-state__title">Your cookbook is empty</p>
@@ -698,6 +739,16 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
         closeDetail(false);
       }
     });
+    // Submit form when search input clear button is clicked
+    var searchInput = document.querySelector('.search-bar__input');
+    if (searchInput) {
+      searchInput.addEventListener('search', function () {
+        if (!this.value) {
+          this.form.submit();
+        }
+      });
+    }
+
   })();
 
 })();

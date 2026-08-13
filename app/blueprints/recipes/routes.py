@@ -1,4 +1,5 @@
 from flask import Blueprint, abort, render_template, request
+from sqlalchemy import or_
 from sqlalchemy.orm import selectinload
 
 from ...extensions import db
@@ -7,11 +8,13 @@ from ...models.tag import Tag
 from ...models.appliance import Appliance
 from ...models.utensil import Utensil
 from ...models.ingredient import Ingredient
+from ...models.instruction import Instruction
 from ...models.recipe_tag import RecipeTag
 from ...models.recipe_category import RecipeCategory
 from ...models.recipe_appliance import RecipeAppliance
 from ...models.recipe_utensil import RecipeUtensil
 from ...models.recipe_ingredient import RecipeIngredient
+from ...models.recipe_instruction import RecipeInstruction
 from ...models.replaceable import Replaceable
 
 recipes_bp = Blueprint("recipes", __name__)
@@ -39,6 +42,7 @@ def list_recipes():
     """GET / — recipe list with multi-facet filtering.
 
     Filter params (all optional, AND logic between facets):
+      ?q=search_term       — search query in title, description, tags, ingredients, categories, appliances, utensils, instructions
       ?category=slug       — single category slug
       ?difficulty=easy     — easy | medium | hard
       ?time_max=20         — cook_time <= N minutes
@@ -47,6 +51,7 @@ def list_recipes():
       ?utensils=3,4        — utensil IDs (OR within set)
       ?ingredients=slug1   — ingredient slugs (OR within set)
     """
+    search_query = (request.args.get("q", "") or "").strip()
     selected_category = (request.args.get("category", "") or "").strip().lower() or None
     selected_difficulty = (request.args.get("difficulty", "") or "").strip().lower() or None
 
@@ -71,6 +76,62 @@ def list_recipes():
     )
 
     # ── Apply filters (AND between facets) ──────────────────────────────────
+
+    if search_query:
+        pattern = f"%{search_query}%"
+        ingr_match_ids = (
+            db.select(RecipeIngredient.recipe_id)
+            .join(RecipeIngredient.ingredient)
+            .where(Ingredient.name.ilike(pattern))
+            .scalar_subquery()
+        )
+        tag_match_ids = (
+            db.select(RecipeTag.recipe_id)
+            .join(RecipeTag.tag)
+            .where(Tag.name.ilike(pattern))
+            .scalar_subquery()
+        )
+        cat_match_ids = (
+            db.select(RecipeCategory.recipe_id)
+            .join(RecipeCategory.category)
+            .where(Category.name.ilike(pattern))
+            .scalar_subquery()
+        )
+        appl_match_ids = (
+            db.select(RecipeAppliance.recipe_id)
+            .join(RecipeAppliance.appliance)
+            .where(Appliance.name.ilike(pattern))
+            .scalar_subquery()
+        )
+        uten_match_ids = (
+            db.select(RecipeUtensil.recipe_id)
+            .join(RecipeUtensil.utensil)
+            .where(Utensil.name.ilike(pattern))
+            .scalar_subquery()
+        )
+        inst_match_ids = (
+            db.select(RecipeInstruction.recipe_id)
+            .join(RecipeInstruction.instruction)
+            .where(
+                or_(
+                    Instruction.description.ilike(pattern),
+                    Instruction.note_text.ilike(pattern),
+                )
+            )
+            .scalar_subquery()
+        )
+        stmt = stmt.where(
+            or_(
+                Recipe.title.ilike(pattern),
+                Recipe.description.ilike(pattern),
+                Recipe.id.in_(ingr_match_ids),
+                Recipe.id.in_(tag_match_ids),
+                Recipe.id.in_(cat_match_ids),
+                Recipe.id.in_(appl_match_ids),
+                Recipe.id.in_(uten_match_ids),
+                Recipe.id.in_(inst_match_ids),
+            )
+        )
 
     if selected_category:
         cat_ids = (
