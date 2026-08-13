@@ -622,7 +622,7 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
     if (q) params.set('q', q);
 
     var qs = params.toString();
-    window.location.href = window.location.pathname + (qs ? '?' + qs : '');
+    window.location.href = "{{ url_for('recipes.list_recipes') }}" + (qs ? '?' + qs : '');
   });
 
   // ── Bottom Sheet Recipe Detail Navigation ───────────────────────────────
@@ -630,6 +630,8 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
     var panel = document.getElementById('detailPanel');
     var scrim = document.getElementById('detailScrim');
     if (!panel) return;
+
+    var listUrl = "{{ url_for('recipes.list_recipes') }}" + window.location.search;
 
     if (scrim) {
       scrim.addEventListener('click', function () {
@@ -675,6 +677,9 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
     }
 
     function openDetail(url, pushState) {
+      if (pushState !== false) {
+        listUrl = "{{ url_for('recipes.list_recipes') }}" + window.location.search;
+      }
       fetch(url)
         .then(function (res) { return res.text(); })
         .then(function (html) {
@@ -715,7 +720,7 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
         scrim.setAttribute('aria-hidden', 'true');
       }
       if (pushState !== false) {
-        history.pushState({}, '', window.location.pathname + window.location.search);
+        history.pushState({}, '', listUrl);
       }
       setTimeout(function () {
         if (!panel.classList.contains('detail-panel--open')) {
