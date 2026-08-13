@@ -154,8 +154,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  /* Extra padding at the bottom keeps text above the white fade zone */
-  padding: var(--space-3) var(--space-4) calc(var(--space-4) + 24px);
+  /* Balanced padding at bottom to keep text readable without crowding top back nav on mobile */
+  padding: var(--space-3) var(--space-4) calc(var(--space-4) + 10px);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -164,18 +164,8 @@
 
 .detail-hero__category-badge {
   align-self: flex-start;
-  font-size: var(--text-xs);
-  font-weight: var(--fw-medium);
-  /* Override the badge--category token colours with white-tinted versions */
-  background-color: rgba(204, 251, 241, 0.90) !important;
-  color: var(--color-accent-text) !important;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-.dark .detail-hero__category-badge {
-  background-color: rgba(19, 78, 74, 0.90) !important;
-  color: var(--color-accent-text) !important;
+  background-color: var(--color-accent-bg);
+  color: var(--color-accent-text);
 }
 
 .detail-hero__title {

@@ -583,7 +583,7 @@
   width: 100%;
   max-width: 480px;
   z-index: 100;
-  padding: 2rem var(--space-4) var(--space-4);
+  padding: var(--space-4) var(--space-4) max(var(--space-4), env(safe-area-inset-bottom, var(--space-4)));
   background-color: var(--color-bg);
   box-sizing: border-box;
 }
@@ -592,6 +592,7 @@
   .filter-cta-wrapper {
     bottom: calc(var(--space-6) + 6px);
     max-width: calc(480px - 12px);
+    padding: var(--space-4);
   }
 }
 
@@ -604,14 +605,15 @@
   gap: var(--space-2);
   background-color: var(--color-secondary-bg);
   color: var(--color-secondary-text);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-family: var(--font-inter);
   font-size: var(--text-sm);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   border: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 1px 3px rgba(0, 0, 0, .06);
+  box-shadow: var(--shadow-card);
   transition: background-color 0.15s ease, transform 0.1s ease;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .filter-cta-btn:hover {
@@ -620,4 +622,13 @@
 
 .filter-cta-btn:active {
   transform: scale(0.98);
+}
+
+.dark .filter-cta-btn {
+  background-color: var(--color-secondary-bg);
+  color: var(--color-secondary-text);
+}
+
+.dark .filter-cta-btn:hover {
+  background-color: var(--color-secondary-hover);
 }

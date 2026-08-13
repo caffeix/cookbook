@@ -240,6 +240,13 @@ ol {
 }
 
 /* ── Scrollbar utilities ────────────────────────────────────────────────── */
+html,
+body,
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -261,6 +268,10 @@ ol {
 ::-webkit-scrollbar-thumb {
   background: var(--color-border-strong);
   border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
 }
 
 ::-webkit-scrollbar-corner {
