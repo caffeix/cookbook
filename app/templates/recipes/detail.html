@@ -207,6 +207,24 @@
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
       });
     }
+
+    // ── Back button navigation ────────────────────────────────────────────────
+    var backBtn = document.querySelector('.detail-hero__btn[aria-label="Back to recipes"]');
+    var detailPage = document.querySelector('.detail-page');
+    if (backBtn && detailPage) {
+      backBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var targetUrl = this.getAttribute('href') || '/recipes';
+        detailPage.classList.add('detail-page--slide-out');
+        setTimeout(function () {
+          if (window.history.length > 1 && document.referrer && document.referrer.indexOf(window.location.host) !== -1) {
+            window.history.back();
+          } else {
+            window.location.href = targetUrl;
+          }
+        }, 180);
+      });
+    }
   })();
 </script>
 {% endblock %}

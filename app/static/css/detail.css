@@ -4,6 +4,53 @@
    Consumes tokens from tokens.css; no values duplicated there.
    ============================================================ */
 
+
+
+/* ── Detail Panel Overlay — Bottom Sheet Slide-Up ─────────────────────── */
+.detail-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 150;
+  background-color: rgba(0, 0, 0, 0.38);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+  pointer-events: none;
+}
+
+.detail-scrim--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.detail-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 151;
+  background-color: var(--color-bg);
+  overflow-y: auto;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+  transform: translate3d(0, 100%, 0);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.detail-panel--open {
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-panel,
+  .detail-scrim {
+    transition: none;
+  }
+}
+
 /* ── Hero ──────────────────────────────────────────────────────────────── */
 .detail-hero {
   position: relative;

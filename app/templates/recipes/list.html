@@ -19,9 +19,14 @@ Browse all your personal recipes on Cooksique.
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/recipes.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/drawer.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/detail.css') }}">
 {% endblock %}
 
 {% block content %}
+
+{# ── Recipe Detail Bottom Sheet Overlay ─────────────────────────────────── #}
+<div id="detailScrim" class="detail-scrim" aria-hidden="true"></div>
+<div id="detailPanel" class="detail-panel" aria-hidden="true"></div>
 
 {# ── Search bar ───────────────────────────────────────────────────────── #}
 <div class="search-wrapper">
@@ -578,6 +583,123 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
     window.location.href = window.location.pathname + (qs ? '?' + qs : '');
   });
 
-}) ();
+  // ── Bottom Sheet Recipe Detail Navigation ───────────────────────────────
+  (function () {
+    var panel = document.getElementById('detailPanel');
+    var scrim = document.getElementById('detailScrim');
+    if (!panel) return;
+
+    if (scrim) {
+      scrim.addEventListener('click', function () {
+        closeDetail(true);
+      });
+    }
+
+    function attachPanelEvents() {
+      // Back / Close button
+      var backBtn = panel.querySelector('.detail-hero__btn[aria-label="Back to recipes"]');
+      if (backBtn) {
+        backBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          closeDetail(true);
+        });
+      }
+
+      // Dark mode toggle inside panel
+      var darkToggle = panel.querySelector('#detailDarkToggle');
+      if (darkToggle) {
+        darkToggle.addEventListener('click', function () {
+          var isDark = document.documentElement.classList.toggle('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+      }
+
+      // Ingredient swap triggers inside panel
+      var triggers = panel.querySelectorAll('[aria-controls^="swap-"]');
+      triggers.forEach(function (trigger) {
+        trigger.addEventListener('click', function () {
+          var swapId = trigger.getAttribute('aria-controls');
+          var strip = document.getElementById(swapId);
+          var icon = trigger.querySelector('.detail-ingredient__swap-icon');
+          if (!strip) return;
+          var isOpen = trigger.getAttribute('aria-expanded') === 'true';
+          trigger.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+          strip.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
+          strip.classList.toggle('detail-swap--open', !isOpen);
+          if (icon) icon.classList.toggle('detail-ingredient__swap-icon--rotated', !isOpen);
+        });
+      });
+    }
+
+    function openDetail(url, pushState) {
+      fetch(url)
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          var content = doc.querySelector('.detail-page');
+          if (!content) {
+            window.location.href = url;
+            return;
+          }
+          panel.innerHTML = content.outerHTML;
+          panel.setAttribute('aria-hidden', 'false');
+          if (scrim) {
+            scrim.setAttribute('aria-hidden', 'false');
+            scrim.classList.add('detail-scrim--open');
+          }
+          // Force layout reflow before triggering slide-up
+          void panel.offsetWidth;
+          panel.classList.add('detail-panel--open');
+
+          if (pushState !== false) {
+            history.pushState({ detailUrl: url }, '', url);
+          }
+
+          attachPanelEvents();
+        })
+        .catch(function () {
+          window.location.href = url;
+        });
+    }
+
+    function closeDetail(pushState) {
+      if (!panel.classList.contains('detail-panel--open')) return;
+      panel.classList.remove('detail-panel--open');
+      panel.setAttribute('aria-hidden', 'true');
+      if (scrim) {
+        scrim.classList.remove('detail-scrim--open');
+        scrim.setAttribute('aria-hidden', 'true');
+      }
+      if (pushState !== false) {
+        history.pushState({}, '', window.location.pathname + window.location.search);
+      }
+      setTimeout(function () {
+        if (!panel.classList.contains('detail-panel--open')) {
+          panel.innerHTML = '';
+        }
+      }, 300);
+    }
+
+    // Intercept clicks on recipe cards
+    document.addEventListener('click', function (e) {
+      var card = e.target.closest('.recipe-card');
+      if (card && card.href) {
+        e.preventDefault();
+        openDetail(card.href, true);
+      }
+    });
+
+    // Handle browser back and forward buttons
+    window.addEventListener('popstate', function (e) {
+      if (e.state && e.state.detailUrl) {
+        openDetail(e.state.detailUrl, false);
+      } else if (panel.classList.contains('detail-panel--open')) {
+        closeDetail(false);
+      }
+    });
+  })();
+
+})();
 </script>
 {% endblock %}

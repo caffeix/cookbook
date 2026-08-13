@@ -12,6 +12,7 @@
   margin: 0 auto;
   /* On wider screens show as a phone-frame-like card */
   position: relative;
+  overflow: hidden;
 }
 
 @media (min-width: 520px) {
