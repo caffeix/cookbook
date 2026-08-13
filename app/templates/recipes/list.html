@@ -676,13 +676,45 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
       });
     }
 
+    var currentRequestId = 0;
+    var currentAbortController = null;
+    var activeUrl = null;
+    var isLoading = false;
+
     function openDetail(url, pushState) {
+      if (activeUrl === url && (isLoading || panel.classList.contains('detail-panel--open'))) {
+        return;
+      }
+
+      currentRequestId++;
+      var requestId = currentRequestId;
+      activeUrl = url;
+      isLoading = true;
+
+      if (currentAbortController) {
+        currentAbortController.abort();
+      }
+      if (typeof AbortController !== 'undefined') {
+        currentAbortController = new AbortController();
+      } else {
+        currentAbortController = null;
+      }
+
       if (pushState !== false) {
         listUrl = "{{ url_for('recipes.list_recipes') }}" + window.location.search;
       }
-      fetch(url)
+
+      var fetchOptions = {};
+      if (currentAbortController) {
+        fetchOptions.signal = currentAbortController.signal;
+      }
+
+      fetch(url, fetchOptions)
         .then(function (res) { return res.text(); })
         .then(function (html) {
+          if (requestId !== currentRequestId) return;
+          isLoading = false;
+
           var parser = new DOMParser();
           var doc = parser.parseFromString(html, 'text/html');
           var content = doc.querySelector('.detail-page');
@@ -706,12 +738,23 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
 
           attachPanelEvents();
         })
-        .catch(function () {
+        .catch(function (err) {
+          if (err && err.name === 'AbortError') return;
+          if (requestId !== currentRequestId) return;
+          isLoading = false;
           window.location.href = url;
         });
     }
 
     function closeDetail(pushState) {
+      currentRequestId++;
+      if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+      }
+      activeUrl = null;
+      isLoading = false;
+
       if (!panel.classList.contains('detail-panel--open')) return;
       panel.classList.remove('detail-panel--open');
       panel.setAttribute('aria-hidden', 'true');
@@ -742,7 +785,7 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
     window.addEventListener('popstate', function (e) {
       if (e.state && e.state.detailUrl) {
         openDetail(e.state.detailUrl, false);
-      } else if (panel.classList.contains('detail-panel--open')) {
+      } else {
         closeDetail(false);
       }
     });
