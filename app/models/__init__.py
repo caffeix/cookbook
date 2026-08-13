@@ -1,6 +1,6 @@
-from .recipe import Recipe
+from .recipe import Recipe, Difficulty
 from .ingredient import Ingredient
-from .recipe_ingredient import RecipeIngredient
+from .recipe_ingredient import RecipeIngredient, IngredientRole
 from .category import Category
 from .recipe_category import RecipeCategory
 from .tag import Tag
@@ -15,8 +15,10 @@ from .replaceable import Replaceable
 
 __all__ = [
     "Recipe",
+    "Difficulty",
     "Ingredient",
     "RecipeIngredient",
+    "IngredientRole",
     "Category",
     "RecipeCategory",
     "Tag",

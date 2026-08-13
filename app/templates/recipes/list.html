@@ -4,7 +4,7 @@
 {% if selected_category %}
 {{ selected_category | title }} Recipes — Cooksique
 {% else %}
-All Recipes — Cooksique
+Recipes — Cooksique
 {% endif %}
 {% endblock %}
 
@@ -46,7 +46,8 @@ Browse all your personal recipes on Cooksique.
 
 {# ── Active-filter summary chip bar ─────────────────────────────────────── #}
 {# Shown only when at least one filter is active; tapping a chip removes it #}
-{% set has_any_filter = selected_category or selected_difficulty or selected_time_max or selected_tags or selected_appliances or selected_utensils or selected_ingredients or request.args.get('q') %}
+{% set has_any_filter = selected_category or selected_difficulty or selected_time_max or selected_tags or
+selected_appliances or selected_utensils or selected_ingredients or request.args.get('q') %}
 {% if has_any_filter %}
 <div class="filter-row-wrapper" aria-label="Active filters">
   <div class="filter-row" role="list">
@@ -54,11 +55,17 @@ Browse all your personal recipes on Cooksique.
     {# Horizontally scrollable chip strip showing active selections #}
     <div class="filter-row__chips no-scrollbar">
 
-      {% set close_svg %}<svg class="chip__close" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>{% endset %}
+      {% set close_svg %}<svg class="chip__close" xmlns="http://www.w3.org/2000/svg" width="11" height="11"
+        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>{% endset %}
 
       {% if selected_category %}
       {% for cat in categories %}{% if cat.slug == selected_category %}
-      <a href="{{ request.path }}?{{ request.query_string | remove_filter('category', cat.slug) }}" class="chip chip--active" role="listitem" title="Remove {{ cat.name }} filter">
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('category', cat.slug) }}"
+        class="chip chip--active" role="listitem" title="Remove {{ cat.name }} filter">
         {% if cat.icon %}<span aria-hidden="true">{{ cat.icon | render_icon }}</span>{% endif %}
         <span>{{ cat.name }}</span>
         {{ close_svg | safe }}
@@ -84,8 +91,8 @@ Browse all your personal recipes on Cooksique.
 
       {% for slug in selected_tags %}
       {% for tag in tags %}{% if tag.slug == slug %}
-      <a href="{{ request.path }}?{{ request.query_string | remove_filter('tags', slug) }}"
-        class="chip chip--active" role="listitem" title="Remove {{ tag.name }} filter">
+      <a href="{{ request.path }}?{{ request.query_string | remove_filter('tags', slug) }}" class="chip chip--active"
+        role="listitem" title="Remove {{ tag.name }} filter">
         <span>{{ tag.name }}</span>
         {{ close_svg | safe }}
       </a>
@@ -177,7 +184,8 @@ Browse all your personal recipes on Cooksique.
           {% if recipe.cook_time %}
           <span class="badge badge--time" title="{{ recipe.cook_time }} minutes">
             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
             </svg>
@@ -186,9 +194,9 @@ Browse all your personal recipes on Cooksique.
           {% endif %}
 
           {% if recipe.difficulty %}
-          {% set diff = recipe.difficulty | lower %}
+          {% set diff = recipe.difficulty.value %}
           <span class="badge badge--{{ diff }}">
-            {{ recipe.difficulty | title }}
+            {{ diff | title }}
           </span>
           {% endif %}
 
@@ -272,8 +280,8 @@ Browse all your personal recipes on Cooksique.
 
 {# ── "Filter" CTA button (fixed sticky bottom) ────────────────────────── #}
 <div class="filter-cta-wrapper">
-  <button class="filter-cta-btn" id="filterCtaBtn" type="button" aria-label="Open filters"
-    aria-haspopup="dialog" aria-controls="filterDrawer">
+  <button class="filter-cta-btn" id="filterCtaBtn" type="button" aria-label="Open filters" aria-haspopup="dialog"
+    aria-controls="filterDrawer">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
@@ -291,45 +299,45 @@ Browse all your personal recipes on Cooksique.
 
 {% block scripts %}
 <script>
-(function () {
-  'use strict';
+  (function () {
+    'use strict';
 
-  // ── Scroll active chip into view on load ──────────────────────────────
-  var activeChip = document.querySelector('.chip--active');
-  if (activeChip && activeChip.scrollIntoView) {
-    activeChip.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'instant' });
-  }
+    // ── Scroll active chip into view on load ──────────────────────────────
+    var activeChip = document.querySelector('.chip--active');
+    if (activeChip && activeChip.scrollIntoView) {
+      activeChip.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'instant' });
+    }
 
-  // ── DOM refs ──────────────────────────────────────────────────────────
-  var drawer     = document.getElementById('filterDrawer');
-  var scrim      = document.getElementById('filterDrawerScrim');
-  var ctaBtn     = document.getElementById('filterCtaBtn');
-  var closeBtn   = document.getElementById('filterDrawerClose');
-  var applyBtn   = document.getElementById('filterApplyBtn');
-  var track      = document.getElementById('filterPanelsTrack');
+    // ── DOM refs ──────────────────────────────────────────────────────────
+    var drawer = document.getElementById('filterDrawer');
+    var scrim = document.getElementById('filterDrawerScrim');
+    var ctaBtn = document.getElementById('filterCtaBtn');
+    var closeBtn = document.getElementById('filterDrawerClose');
+    var applyBtn = document.getElementById('filterApplyBtn');
+    var track = document.getElementById('filterPanelsTrack');
 
-  if (!drawer) return; // guard: drawer not rendered
+    if (!drawer) return; // guard: drawer not rendered
 
-  // ── Panel index constants ─────────────────────────────────────────────
-  var PANEL_MAIN        = 0;
-  var PANEL_CATEGORY    = 1;
-  var PANEL_TAGS        = 2;
-  var PANEL_INGREDIENTS = 3;
+    // ── Panel index constants ─────────────────────────────────────────────
+    var PANEL_MAIN = 0;
+    var PANEL_CATEGORY = 1;
+    var PANEL_TAGS = 2;
+    var PANEL_INGREDIENTS = 3;
 
-  var currentPanel = PANEL_MAIN;
+    var currentPanel = PANEL_MAIN;
 
-  // ── In-memory filter state (mirrors URL on load, updated by chips) ────
-  // Single-value facets
-  var state = {
-    category:    '{{ selected_category or '' }}',
-    difficulty:  '{{ selected_difficulty or '' }}',
-    time_max:    '{{ selected_time_max or '' }}',
-    // Multi-value facets (arrays of strings)
-    tags:        {{ (selected_tags | tojson) if selected_tags else '[]' }},
-    appliances:  {{ (selected_appliances | tojson) if selected_appliances else '[]' }},
-    utensils:    {{ (selected_utensils | tojson) if selected_utensils else '[]' }},
-    ingredients: {{ (selected_ingredients | tojson) if selected_ingredients else '[]' }},
-  };
+    // ── In-memory filter state (mirrors URL on load, updated by chips) ────
+    // Single-value facets
+    var state = {
+      category: '{{ selected_category or '' }}',
+      difficulty: '{{ selected_difficulty or '' }}',
+      time_max: '{{ selected_time_max or '' }}',
+      // Multi-value facets (arrays of strings)
+      tags: {{ (selected_tags | tojson) if selected_tags else '[]' }},
+      appliances: {{ (selected_appliances | tojson) if selected_appliances else '[]' }},
+      utensils: {{ (selected_utensils | tojson) if selected_utensils else '[]' }},
+      ingredients: {{ (selected_ingredients | tojson) if selected_ingredients else '[]' }},
+    };
 
   // ── Open / close drawer ───────────────────────────────────────────────
   function openDrawer() {
@@ -353,7 +361,7 @@ Browse all your personal recipes on Cooksique.
   function updateScrollFabs() {
     document.querySelectorAll('.filter-drawer__panel').forEach(function (panel) {
       var body = panel.querySelector('.filter-drawer__body, .filter-drawer__sub-body');
-      var fab  = panel.querySelector('.filter-drawer__scroll-fab');
+      var fab = panel.querySelector('.filter-drawer__scroll-fab');
       if (!body || !fab) return;
 
       // Check if scrollable downwards with a tiny margin threshold (e.g. 8px)
@@ -381,9 +389,9 @@ Browse all your personal recipes on Cooksique.
   // Re-check scroll on window resize
   window.addEventListener('resize', updateScrollFabs);
 
-  ctaBtn  && ctaBtn.addEventListener('click', openDrawer);
+  ctaBtn && ctaBtn.addEventListener('click', openDrawer);
   closeBtn && closeBtn.addEventListener('click', closeDrawer);
-  scrim   && scrim.addEventListener('click', closeDrawer);
+  scrim && scrim.addEventListener('click', closeDrawer);
 
   // Close on Escape
   document.addEventListener('keydown', function (e) {
@@ -411,8 +419,8 @@ Browse all your personal recipes on Cooksique.
   }
 
   // Drill-down openers
-  var drillCategory    = document.getElementById('drillCategory');
-  var drillTags        = document.getElementById('drillTags');
+  var drillCategory = document.getElementById('drillCategory');
+  var drillTags = document.getElementById('drillTags');
   var drillIngredients = document.getElementById('drillIngredients');
 
   function bindDrill(el, panelIndex) {
@@ -424,8 +432,8 @@ Browse all your personal recipes on Cooksique.
     });
   }
 
-  bindDrill(drillCategory,    PANEL_CATEGORY);
-  bindDrill(drillTags,        PANEL_TAGS);
+  bindDrill(drillCategory, PANEL_CATEGORY);
+  bindDrill(drillTags, PANEL_TAGS);
   bindDrill(drillIngredients, PANEL_INGREDIENTS);
 
   // Back buttons (Done buttons share the same class)
@@ -445,7 +453,7 @@ Browse all your personal recipes on Cooksique.
   document.querySelectorAll('.filter-chip[data-facet]').forEach(function (chip) {
     chip.addEventListener('click', function () {
       var facet = chip.dataset.facet;
-      var val   = chip.dataset.value;
+      var val = chip.dataset.value;
 
       if (SINGLE_FACETS.indexOf(facet) !== -1) {
         // Radio behaviour: toggle off if already selected
@@ -489,8 +497,8 @@ Browse all your personal recipes on Cooksique.
     });
   }
 
-  bindSubClear('categoryClearBtn',    'category',    true);
-  bindSubClear('tagsClearBtn',        'tags',        false);
+  bindSubClear('categoryClearBtn', 'category', true);
+  bindSubClear('tagsClearBtn', 'tags', false);
   bindSubClear('ingredientsClearBtn', 'ingredients', false);
 
   // ── Main Header Clear button ─────────────────────────────────────────
@@ -554,12 +562,12 @@ Browse all your personal recipes on Cooksique.
   applyBtn && applyBtn.addEventListener('click', function () {
     var params = new URLSearchParams();
 
-    if (state.category)    params.set('category',    state.category);
-    if (state.difficulty)  params.set('difficulty',  state.difficulty);
-    if (state.time_max)    params.set('time_max',     state.time_max);
-    if (state.tags.length)        params.set('tags',        state.tags.join(','));
-    if (state.appliances.length)  params.set('appliances',  state.appliances.join(','));
-    if (state.utensils.length)    params.set('utensils',    state.utensils.join(','));
+    if (state.category) params.set('category', state.category);
+    if (state.difficulty) params.set('difficulty', state.difficulty);
+    if (state.time_max) params.set('time_max', state.time_max);
+    if (state.tags.length) params.set('tags', state.tags.join(','));
+    if (state.appliances.length) params.set('appliances', state.appliances.join(','));
+    if (state.utensils.length) params.set('utensils', state.utensils.join(','));
     if (state.ingredients.length) params.set('ingredients', state.ingredients.join(','));
 
     // Preserve existing search query if present
@@ -570,6 +578,6 @@ Browse all your personal recipes on Cooksique.
     window.location.href = window.location.pathname + (qs ? '?' + qs : '');
   });
 
-})();
+}) ();
 </script>
 {% endblock %}

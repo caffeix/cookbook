@@ -24,6 +24,10 @@
   /* 22px — recipe detail h1       */
   --text-app-title: 1.25rem;
   /* 20px — "Cooksique" nav brand  */
+  --text-section-heading: 0.8125rem;
+  /* 13px — detail page section headings (INGREDIENTS / STEPS) */
+  --text-step-num: 1.125rem;
+  /* 18px — instruction step number */
 
   /* --- Font weights --- */
   --fw-normal: 400;

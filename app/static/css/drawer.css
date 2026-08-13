@@ -1,6 +1,6 @@
 /* ============================================================
    drawer.css — Filter Bottom Drawer
-   Cookbook App · Mobile-first (412px target)
+   Cookbook App · Mobile-first
    ============================================================ */
 
 /* ── Scrim (overlay behind the drawer) ──────────────────────────────────── */
@@ -83,8 +83,8 @@
 }
 
 .filter-drawer__clear-btn {
-  font-family: var(--font-sans);
-  font-size: var(--text-xs);
+  font-family: var(--font-inter);
+  font-size: var(--text-sm);
   font-weight: var(--fw-semibold);
   color: var(--color-text-muted);
   background: none;
@@ -291,7 +291,7 @@
 
 /* ── filter-chip component ───────────────────────────────────────────────── */
 /* Distinct from .chip (list page border-only chip).                         */
-/* Figma spec: surface bg, 1.5px border, subtle shadow. Teal on selection.  */
+/* Surface bg, 1.5px border, subtle shadow. Teal on selection.              */
 .filter-chip {
   display: inline-flex;
   align-items: center;
@@ -328,7 +328,7 @@
   transform: scale(0.95);
 }
 
-/* Selected state: teal fill, light teal text (Figma: #0f766e bg / #5eead4 text) */
+/* Selected state: teal fill, light teal text */
 .filter-chip--active {
   background-color: var(--color-accent-text);
   color: var(--color-accent-hover-text);
@@ -545,7 +545,7 @@
   align-content: flex-start;
 }
 
-/* Larger chip padding for sub-panel grid (Figma: 10px 18px) */
+/* Larger chip padding for sub-panel grid */
 .filter-drawer__sub-chips .filter-chip {
   padding: 10px 18px;
 }

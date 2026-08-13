@@ -1,0 +1,56 @@
+{#
+ingredient_row.html — reusable ingredient list row for the detail page.
+
+Expected variables (set before include):
+link : RecipeIngredient — carries .ingredient, .quantity, .unit, .role
+swap_name : str|None — name of the swap ingredient, or None if no swap exists
+loop_index : int — 1-based index from the parent loop (for unique toggle IDs)
+#}
+
+{% set has_swap = swap_name is not none %}
+{% set swap_id = "swap-" ~ loop_index %}
+{% set is_main = has_swap %}
+
+{% set role_str = (link.role.value if link.role.value is defined else link.role|string)|lower if link.role else '' %}
+{% set is_optional = role_str == 'optional' %}
+
+<div
+  class="detail-ingredient{% if has_swap %} detail-ingredient--swappable{% endif %}{% if is_optional %} detail-ingredient--optional{% endif %}">
+  {# ── Row ── #}
+  <div class="detail-ingredient__row{% if has_swap %} detail-ingredient__row--swap-trigger{% endif %}" {% if has_swap %}
+    role="button" tabindex="0" aria-expanded="false" aria-controls="{{ swap_id }}" onclick="toggleSwap(this)"
+    onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSwap(this)}" {% endif %}>
+
+    {# Left: name + optional swap icon #}
+    <div class="detail-ingredient__left">
+      <span class="detail-ingredient__name{% if has_swap %} detail-ingredient__name--swap{% endif %}">
+        {{ link.ingredient.name }}
+      </span>
+      {% if has_swap %}
+      <span class="detail-ingredient__swap-icon" aria-hidden="true">
+        {# Recycle / refresh arrows SVG (14×14, teal) #}
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 4 1 10 7 10"></polyline>
+          <polyline points="23 20 23 14 17 14"></polyline>
+          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+        </svg>
+      </span>
+      {% endif %}
+    </div>
+
+    {# Right: role label only #}
+    <div class="detail-ingredient__right">
+      {% if link.role %}
+      <span class="detail-ingredient__role">{{ link.role.value }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Swap strip (collapsed by default) ── #}
+  {% if has_swap %}
+  <div class="detail-swap" id="{{ swap_id }}" aria-hidden="true">
+    <span class="detail-swap__text">Swap for: <strong>{{ swap_name }}</strong></span>
+  </div>
+  {% endif %}
+</div>

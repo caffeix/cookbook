@@ -1,9 +1,8 @@
-from flask import Blueprint, render_template, request
-from sqlalchemy import func
+from flask import Blueprint, abort, render_template, request
 from sqlalchemy.orm import selectinload
 
 from ...extensions import db
-from ...models import Recipe, Category
+from ...models import Recipe, Category, Difficulty
 from ...models.tag import Tag
 from ...models.appliance import Appliance
 from ...models.utensil import Utensil
@@ -13,6 +12,7 @@ from ...models.recipe_category import RecipeCategory
 from ...models.recipe_appliance import RecipeAppliance
 from ...models.recipe_utensil import RecipeUtensil
 from ...models.recipe_ingredient import RecipeIngredient
+from ...models.replaceable import Replaceable
 
 recipes_bp = Blueprint("recipes", __name__)
 
@@ -82,7 +82,10 @@ def list_recipes():
         stmt = stmt.where(Recipe.id.in_(cat_ids))
 
     if selected_difficulty:
-        stmt = stmt.where(func.lower(Recipe.difficulty) == selected_difficulty)
+        # Map the raw string to the Difficulty enum value for a type-safe comparison
+        difficulty_enum = Difficulty(selected_difficulty) if selected_difficulty in Difficulty._value2member_map_ else None
+        if difficulty_enum:
+            stmt = stmt.where(Recipe.difficulty == difficulty_enum)
 
     if selected_time_max:
         stmt = stmt.where(Recipe.cook_time <= selected_time_max)
@@ -168,4 +171,48 @@ def list_recipes():
         selected_difficulty=selected_difficulty,
         selected_time_max=selected_time_max,
         active_filter_count=active_filter_count,
+    )
+
+
+@recipes_bp.route("/recipes/<int:id>", strict_slashes=False)
+def recipe_detail(id: int):
+    """GET /recipes/<id> — recipe detail page.
+
+    Single eager-loaded query covers all relationships, avoiding N+1.
+    swap_map gives O(1) substitution lookup in the template.
+    """
+    stmt = (
+        db.select(Recipe)
+        .options(
+            selectinload(Recipe.ingredient_links).selectinload(RecipeIngredient.ingredient),
+            selectinload(Recipe.category_links).selectinload(RecipeCategory.category),
+            selectinload(Recipe.tag_links).selectinload(RecipeTag.tag),
+            selectinload(Recipe.appliance_links).selectinload(RecipeAppliance.appliance),
+            selectinload(Recipe.utensil_links).selectinload(RecipeUtensil.utensil),
+            selectinload(Recipe.replaceables).selectinload(Replaceable.original_ingredient),
+            selectinload(Recipe.replaceables).selectinload(Replaceable.swap_ingredient),
+        )
+        .where(Recipe.id == id)
+    )
+    recipe = db.session.execute(stmt).scalar_one_or_none()
+    if recipe is None:
+        abort(404)
+
+    # Build swap_map: {original_ingredient_id: swap_ingredient_name}
+    swap_map: dict[int, str] = {
+        r.original_ingredient_id: r.swap_ingredient.name
+        for r in recipe.replaceables
+    }
+
+    # Sort instruction_links by step number (nulls sorted last)
+    sorted_instruction_links = sorted(
+        recipe.instruction_links,
+        key=lambda link: (link.instruction.step is None, link.instruction.step or 0),
+    )
+
+    return render_template(
+        "recipes/detail.html",
+        recipe=recipe,
+        swap_map=swap_map,
+        sorted_instruction_links=sorted_instruction_links,
     )

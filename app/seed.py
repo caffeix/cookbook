@@ -2,12 +2,13 @@ import click
 from flask import Blueprint
 from .extensions import db
 from .models import (
-    Recipe, Ingredient, RecipeIngredient,
+    Recipe, Ingredient, RecipeIngredient, IngredientRole,
     Tag, RecipeTag,
     Category, RecipeCategory,
-    Replaceable, Appliance, 
+    Replaceable, Appliance,
     Utensil, RecipeAppliance,
-    RecipeUtensil, Instruction, RecipeInstruction
+    RecipeUtensil, Instruction, RecipeInstruction,
+    Difficulty,
 )
 from .utils import slugify
 
@@ -67,7 +68,7 @@ def seed():
         description="A simple, flavour-packed weeknight pasta ready in under 20 minutes.",
         picture="uploads/garlic_pasta.jpg",
         cook_time=20,
-        difficulty="easy",
+        difficulty=Difficulty.EASY,
     )
 
     pancake_recipe = Recipe(
@@ -75,7 +76,7 @@ def seed():
         description="Classic homemade golden pancakes perfect for breakfast.",
         picture="uploads/pancakes.jpg",
         cook_time=15,
-        difficulty="easy",
+        difficulty=Difficulty.EASY,
     )
 
     tacos_recipe = Recipe(
@@ -83,7 +84,7 @@ def seed():
         description="Savory spiced ground beef filled into crispy tortilla shells with fresh toppings.",
         picture="uploads/tacos.jpg",
         cook_time=25,
-        difficulty="medium",
+        difficulty=Difficulty.MEDIUM,
     )
 
     flour = Ingredient(name="Flour", slug=slugify("Flour"))
@@ -105,8 +106,8 @@ def seed():
     pasta_inst3 = Instruction(step=3, description="Toss drained pasta with garlic oil and pasta water.", note_text="Season with salt and pepper to taste.")
     inst1 = Instruction(step=1, description="Whisk flour, milk, and eggs in a bowl until smooth.", note_text="Do not overmix to keep pancakes fluffy.")
     inst2 = Instruction(step=2, description="Pour batter onto a hot frying pan and cook until golden on both sides.", note_text="Flip when bubbles form.")
-    inst3 = Instruction(step=3, description="Brown the beef in a pan with seasonings.", note_text="Drain excess fat if needed.")
-    inst4 = Instruction(step=4, description="Fill taco shells with beef and top with shredded cheddar.", note_text="Serve hot with fresh salsa.")
+    inst3 = Instruction(step=1, description="Brown the beef in a pan with seasonings.", note_text="Drain excess fat if needed.")
+    inst4 = Instruction(step=2, description="Fill taco shells with beef and top with shredded cheddar.", note_text="Serve hot with fresh salsa.")
 
     air_fryer = Appliance(name="Air Fryer", icon="air-fryer")
     frying_pan = Appliance(name="Frying pan", icon="frying-pan")
@@ -132,9 +133,9 @@ def seed():
 
     db.session.add_all([
         # Recipe 1: Garlic Pasta
-        RecipeIngredient(recipe_id=recipe.id, ingredient_id=garlic.id, quantity="2", unit="cloves"),
-        RecipeIngredient(recipe_id=recipe.id, ingredient_id=olive_oil.id, quantity="2", unit="tbsp"),
-        RecipeIngredient(recipe_id=recipe.id, ingredient_id=spaghetti.id, quantity="200", unit="g"),
+        RecipeIngredient(recipe_id=recipe.id, ingredient_id=garlic.id, quantity="2", unit="cloves", role=IngredientRole.MAIN),
+        RecipeIngredient(recipe_id=recipe.id, ingredient_id=olive_oil.id, quantity="2", unit="tbsp", role=IngredientRole.ESSENTIAL),
+        RecipeIngredient(recipe_id=recipe.id, ingredient_id=spaghetti.id, quantity="200", unit="g", role=IngredientRole.ESSENTIAL),
         RecipeCategory(recipe_id=recipe.id, category_id=italian_category.id),
         RecipeInstruction(recipe_id=recipe.id, instruction_id=pasta_inst1.id),
         RecipeInstruction(recipe_id=recipe.id, instruction_id=pasta_inst2.id),
@@ -148,9 +149,9 @@ def seed():
         RecipeAppliance(recipe_id=recipe.id, appliance_id=frying_pan.id),
 
         # Recipe 2: Fluffy Pancakes
-        RecipeIngredient(recipe_id=pancake_recipe.id, ingredient_id=flour.id, quantity="1", unit="cup"),
-        RecipeIngredient(recipe_id=pancake_recipe.id, ingredient_id=milk.id, quantity="1", unit="cup"),
-        RecipeIngredient(recipe_id=pancake_recipe.id, ingredient_id=egg.id, quantity="1", unit="piece"),
+        RecipeIngredient(recipe_id=pancake_recipe.id, ingredient_id=flour.id, quantity="1", unit="cup", role=IngredientRole.MAIN),
+        RecipeIngredient(recipe_id=pancake_recipe.id, ingredient_id=milk.id, quantity="1", unit="cup", role=IngredientRole.ESSENTIAL),
+        RecipeIngredient(recipe_id=pancake_recipe.id, ingredient_id=egg.id, quantity="1", unit="piece", role=IngredientRole.ESSENTIAL),
         RecipeTag(recipe_id=pancake_recipe.id, tag_id=breakfast_tag.id),
         RecipeCategory(recipe_id=pancake_recipe.id, category_id=american_category.id),
         RecipeInstruction(recipe_id=pancake_recipe.id, instruction_id=inst1.id),
@@ -165,9 +166,9 @@ def seed():
         RecipeAppliance(recipe_id=pancake_recipe.id, appliance_id=frying_pan.id),
 
         # Recipe 3: Crispy Beef Tacos
-        RecipeIngredient(recipe_id=tacos_recipe.id, ingredient_id=ground_beef.id, quantity="300", unit="g"),
-        RecipeIngredient(recipe_id=tacos_recipe.id, ingredient_id=taco_shell.id, quantity="4", unit="shells"),
-        RecipeIngredient(recipe_id=tacos_recipe.id, ingredient_id=cheddar.id, quantity="50", unit="g"),
+        RecipeIngredient(recipe_id=tacos_recipe.id, ingredient_id=ground_beef.id, quantity="300", unit="g", role=IngredientRole.MAIN),
+        RecipeIngredient(recipe_id=tacos_recipe.id, ingredient_id=taco_shell.id, quantity="4", unit="shells", role=IngredientRole.ESSENTIAL),
+        RecipeIngredient(recipe_id=tacos_recipe.id, ingredient_id=cheddar.id, quantity="50", unit="g", role=IngredientRole.OPTIONAL),
         RecipeTag(recipe_id=tacos_recipe.id, tag_id=dinner_tag.id),
         RecipeCategory(recipe_id=tacos_recipe.id, category_id=mexican_category.id),
         RecipeInstruction(recipe_id=tacos_recipe.id, instruction_id=inst3.id),

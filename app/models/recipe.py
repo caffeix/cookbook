@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import enum
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import String, Text, Integer
+from sqlalchemy import Enum, String, Text, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -19,6 +20,12 @@ if TYPE_CHECKING:
     from app.models.replaceable import Replaceable
 
 
+class Difficulty(str, enum.Enum):
+    EASY = "easy"
+    MEDIUM = "medium"
+    HARD = "hard"
+
+
 class Recipe(TimestampMixin, db.Model):
     __tablename__ = "recipe"
 
@@ -28,7 +35,9 @@ class Recipe(TimestampMixin, db.Model):
     # Stored as a relative path under static/uploads/, e.g. "uploads/pasta.jpg"
     picture: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     cook_time: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    difficulty: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    difficulty: Mapped[Optional[Difficulty]] = mapped_column(
+        Enum(Difficulty, name="difficulty", native_enum=False), nullable=True
+    )
 
     # Association-object relationships (exposes the join row for extra columns)
     ingredient_links: Mapped[list[RecipeIngredient]] = relationship(

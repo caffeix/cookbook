@@ -1,0 +1,421 @@
+/* ============================================================
+   detail.css — Recipe Detail Page
+   Cookbook App · Mobile-first
+   Consumes tokens from tokens.css; no values duplicated there.
+   ============================================================ */
+
+/* ── Hero ──────────────────────────────────────────────────────────────── */
+.detail-hero {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  background-color: var(--color-accent-bg);
+  flex-shrink: 0;
+}
+
+.detail-hero__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-hero__img--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent-text);
+  opacity: 0.35;
+}
+
+/* Gradient scrim: transparent top → dark bottom */
+.detail-hero__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    /* White fade at bottom — merges hero into card */
+    linear-gradient(to top,
+      #FDFEFE 0%,
+      rgba(253, 254, 254, 0.85) 12%,
+      rgba(253, 254, 254, 0) 40%),
+    /* Dark overlay at top — keeps back/toggle buttons readable */
+    linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.42) 0%,
+      rgba(0, 0, 0, 0.20) 35%,
+      rgba(0, 0, 0, 0) 60%);
+  pointer-events: none;
+}
+
+/* ── Hero nav strip ────────────────────────────────────────────────────── */
+.detail-hero__nav {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.detail-hero__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background-color: rgba(253, 254, 254, 0.80);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, transform 0.12s ease;
+  /* Expand touch target without growing visually */
+  position: relative;
+}
+
+.detail-hero__btn::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.detail-hero__btn:hover {
+  background-color: rgba(253, 254, 254, 0.95);
+  transform: scale(1.06);
+}
+
+.detail-hero__btn:active {
+  transform: scale(0.94);
+}
+
+/* Dark mode: btn keeps translucent white — the dark surface reads correctly */
+.dark .detail-hero__btn {
+  background-color: rgba(20, 35, 34, 0.80);
+  color: var(--color-text-primary);
+}
+
+/* ── Hero content (badge + title) ─────────────────────────────────────── */
+.detail-hero__content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /* Extra padding at the bottom keeps text above the white fade zone */
+  padding: var(--space-3) var(--space-4) calc(var(--space-4) + 24px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  z-index: 2;
+}
+
+.detail-hero__category-badge {
+  align-self: flex-start;
+  font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
+  /* Override the badge--category token colours with white-tinted versions */
+  background-color: rgba(204, 251, 241, 0.90) !important;
+  color: var(--color-accent-text) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.detail-hero__title {
+  font-size: var(--text-detail-title);
+  font-weight: var(--fw-bold);
+  color: #ffffff;
+  line-height: var(--leading-tight);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.30);
+}
+
+/* ── Content card ──────────────────────────────────────────────────────── */
+.detail-card {
+  background-color: var(--color-surface);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  /* Rounded bottom to match the page-wrapper frame on desktop */
+  min-height: calc(100dvh - 220px);
+  padding-bottom: var(--space-8);
+}
+
+/* ── Meta badges row ───────────────────────────────────────────────────── */
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* ── Section Dividers ────────────────────────────────────────────────── */
+.detail-divider {
+  display: block;
+  height: 1px;
+  background-color: var(--color-border);
+  width: 100%;
+  margin-top: 0.9rem;
+  margin-bottom: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* ── Section (INGREDIENTS / STEPS) ────────────────────────────────────── */
+.detail-section {
+  margin-top: 20px;
+}
+
+.detail-divider+.detail-section {
+  margin-top: 0;
+}
+
+.detail-section__heading {
+  font-size: var(--text-section-heading);
+  font-weight: var(--fw-bold);
+  color: var(--color-accent-text);
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  margin-bottom: var(--space-1);
+  padding-bottom: var(--space-1);
+}
+
+/* ── Ingredient list ───────────────────────────────────────────────────── */
+.detail-ingredient-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: var(--space-1);
+}
+
+/* ── Ingredient row ────────────────────────────────────────────────────── */
+.detail-ingredient {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.detail-ingredient__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-inter);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg);
+  gap: var(--space-2);
+  min-height: 40px;
+}
+
+.detail-ingredient__row--swap-trigger {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.detail-ingredient__row--swap-trigger:hover {
+  background-color: var(--color-border);
+}
+
+.detail-ingredient__row--swap-trigger:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent-text);
+}
+
+/* Optional ingredient rows have slightly transparent background */
+.detail-ingredient--optional .detail-ingredient__row {
+  background-color: color-mix(in srgb, var(--color-bg) 45%, transparent);
+}
+
+.detail-ingredient__left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.detail-ingredient__name {
+  font-size: var(--text-section-heading);
+  font-weight: var(--fw-normal);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Swappable ingredient: teal + bold */
+.detail-ingredient__name--swap {
+  color: var(--color-accent-text);
+  font-weight: var(--fw-bold);
+}
+
+.detail-ingredient__swap-icon {
+  color: var(--color-accent-text);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.detail-ingredient__swap-icon--rotated {
+  transform: rotate(180deg);
+}
+
+.detail-ingredient__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.detail-ingredient__role {
+  font-size: var(--text-xs);
+  font-weight: var(--fw-normal);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ── Swap strip ────────────────────────────────────────────────────────── */
+.detail-swap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+  opacity: 0;
+  border: 1px solid color-mix(in srgb, var(--color-accent-text) 30%, transparent);
+  border-radius: var(--radius-sm);
+}
+
+.detail-swap--open {
+  max-height: 80px;
+  /* generous ceiling — actual content ~38px */
+  opacity: 1;
+}
+
+.detail-swap__text {
+  display: block;
+  padding: 10px;
+  background-color: var(--color-accent-bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: var(--fw-medium);
+  font-family: var(--font-inter);
+  color: var(--color-accent-text);
+  line-height: 1.4;
+}
+
+.detail-swap__text strong {
+  font-weight: var(--fw-semibold);
+}
+
+.dark .detail-swap__text {
+  background-color: var(--color-accent-bg);
+}
+
+/* ── Steps list ─────────────────────────────────────────────────────────── */
+.detail-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: var(--space-3);
+  padding-left: var(--space-4);
+  list-style: none;
+}
+
+.detail-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+  /* breathing room between steps */
+}
+
+.detail-step:last-child {
+  padding-bottom: 0;
+}
+
+.detail-step__body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.detail-step__num {
+  font-size: var(--text-step-num);
+  font-weight: var(--fw-bold);
+  font-family: var(--font-sans);
+  color: var(--color-accent-text);
+  line-height: 1;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.detail-step__text {
+  font-size: var(--text-section-heading);
+  font-family: var(--font-inter);
+  font-weight: var(--fw-normal);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+}
+
+/* ── Note callout ───────────────────────────────────────────────────────── */
+.detail-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: 10px;
+  background-color: var(--color-medium-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--color-medium-text) 20%, transparent);
+  margin-left: 0;
+  /* indent under text */
+}
+
+.detail-note__icon {
+  color: var(--color-medium-text);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-top: 1px;
+}
+
+.detail-note__text {
+  font-size: 0.75rem;
+  font-weight: var(--fw-normal);
+  font-family: var(--font-inter);
+  color: var(--color-medium-text);
+  line-height: 1.45;
+}
+
+.dark .detail-note {
+  background-color: var(--color-medium-bg);
+}
+
+/* ── Dark-mode surface overrides ────────────────────────────────────────── */
+.dark .detail-card {
+  background-color: var(--color-surface);
+}
+
+.dark .detail-ingredient__row {
+  background-color: var(--color-bg);
+}
+
+/* In dark mode the white bottom-fade must use the dark surface colour */
+.dark .detail-hero__scrim {
+  background:
+    linear-gradient(to top,
+      #142322 0%,
+      rgba(20, 35, 34, 0.85) 12%,
+      rgba(20, 35, 34, 0) 40%),
+    linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.50) 0%,
+      rgba(0, 0, 0, 0.20) 35%,
+      rgba(0, 0, 0, 0) 60%);
+}
+
+/* ── Desktop frame: card extends inside the rounded page-wrapper ─────────── */
+@media (min-width: 520px) {
+  .detail-hero {
+    height: 240px;
+  }
+}
