@@ -498,6 +498,7 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
 
   document.querySelectorAll('.filter-chip[data-facet]').forEach(function (chip) {
     chip.addEventListener('click', function () {
+      chip.blur();
       var facet = chip.dataset.facet;
       var val = chip.dataset.value;
 
@@ -652,6 +653,7 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
         darkToggle.addEventListener('click', function () {
           var isDark = document.documentElement.classList.toggle('dark');
           localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          darkToggle.blur();
         });
       }
 

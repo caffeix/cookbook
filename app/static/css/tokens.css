@@ -206,21 +206,37 @@ ol {
   list-style: none;
 }
 
-/* ── Dark-mode icon toggling ────────────────────────────────────────────── */
-.icon-moon {
+/* ── Dark-mode icon toggling & transition animation ──────────────────────── */
+.icon-moon,
+.icon-sun {
   display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -8px;
+  margin-left: -8px;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+  will-change: transform, opacity;
+}
+
+.icon-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 .icon-sun {
-  display: none;
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.4);
 }
 
 .dark .icon-moon {
-  display: none;
+  opacity: 0;
+  transform: rotate(90deg) scale(0.4);
 }
 
 .dark .icon-sun {
-  display: block;
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 /* ── Scrollbar utilities ────────────────────────────────────────────────── */

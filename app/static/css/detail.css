@@ -119,9 +119,10 @@
   justify-content: center;
   color: var(--color-text-primary);
   flex-shrink: 0;
-  transition: background-color 0.15s ease, transform 0.12s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
   /* Expand touch target without growing visually */
   position: relative;
+  overflow: hidden;
 }
 
 .detail-hero__btn::before {
@@ -130,13 +131,15 @@
   inset: -8px;
 }
 
-.detail-hero__btn:hover {
-  background-color: rgba(253, 254, 254, 0.95);
-  transform: scale(1.06);
+@media (hover: hover) {
+  .detail-hero__btn:hover {
+    background-color: rgba(253, 254, 254, 0.95);
+    transform: scale(1.06);
+  }
 }
 
 .detail-hero__btn:active {
-  transform: scale(0.94);
+  transform: scale(0.88);
 }
 
 /* Dark mode: btn keeps translucent white — the dark surface reads correctly */
@@ -168,6 +171,11 @@
   color: var(--color-accent-text) !important;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+}
+
+.dark .detail-hero__category-badge {
+  background-color: rgba(19, 78, 74, 0.90) !important;
+  color: var(--color-accent-text) !important;
 }
 
 .detail-hero__title {
