@@ -12,7 +12,7 @@
   margin: 0 auto;
   /* On wider screens show as a phone-frame-like card */
   position: relative;
-  overflow: hidden;
+  overflow: clip;
 }
 
 @media (min-width: 520px) {
@@ -24,7 +24,7 @@
     border-radius: var(--radius-lg);
     border: 6px solid var(--color-border-strong);
     box-shadow: var(--shadow-app);
-    overflow: hidden;
+    overflow: clip;
     min-height: calc(100dvh - 3rem);
   }
 }
@@ -576,14 +576,12 @@
 
 /* ── "Filter" CTA button (coral, bottom of page) ──────────────────────── */
 .filter-cta-wrapper {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
+  position: sticky;
+  bottom: max(var(--space-4), env(safe-area-inset-bottom, var(--space-4)));
   z-index: 100;
-  padding: var(--space-4) var(--space-4) max(var(--space-4), env(safe-area-inset-bottom, var(--space-4)));
+  width: 100%;
+  padding: 0 var(--space-4) max(var(--space-4), env(safe-area-inset-bottom, var(--space-4)));
+  margin-top: -65px;
   background-color: transparent;
   pointer-events: none;
   box-sizing: border-box;
@@ -591,9 +589,8 @@
 
 @media (min-width: 520px) {
   .filter-cta-wrapper {
-    bottom: calc(var(--space-6) + 6px);
-    max-width: calc(480px - 12px);
-    padding: var(--space-4);
+    bottom: var(--space-4);
+    padding: 0 var(--space-4) var(--space-4);
   }
 }
 
