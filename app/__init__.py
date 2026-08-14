@@ -1,3 +1,4 @@
+from app.curated_seed import curated_seed_bp
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -22,7 +23,7 @@ def create_app(config_class=Config):
 
     app.register_blueprint(main_bp)
     app.register_blueprint(recipes_bp, url_prefix="", strict_slashes=False)
-    app.register_blueprint(seed_bp)
+    app.register_blueprint(curated_seed_bp)
 
     from . import models  # noqa: F401 — ensures all models are registered with SQLAlchemy
 
