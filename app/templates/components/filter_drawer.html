@@ -53,14 +53,16 @@
           <div class="filter-drawer__section">
             <p class="filter-drawer__section-label">Cooking Time</p>
             <div class="filter-drawer__chips-row">
+              {% for time_option in [20, 30, 60] %}
               <button
                 type="button"
-                class="filter-chip{% if selected_time_max == 20 %} filter-chip--active{% endif %}"
+                class="filter-chip{% if selected_time_max == time_option %} filter-chip--active{% endif %}"
                 data-facet="time_max"
-                data-value="20"
-                aria-pressed="{{ 'true' if selected_time_max == 20 else 'false' }}">
-                &#x2264; 20 min
+                data-value="{{ time_option }}"
+                aria-pressed="{{ 'true' if selected_time_max == time_option else 'false' }}">
+                &#x2264; {{ time_option }} min
               </button>
+              {% endfor %}
             </div>
           </div>
 
