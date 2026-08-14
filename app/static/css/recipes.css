@@ -584,7 +584,8 @@
   max-width: 480px;
   z-index: 100;
   padding: var(--space-4) var(--space-4) max(var(--space-4), env(safe-area-inset-bottom, var(--space-4)));
-  background-color: var(--color-bg);
+  background-color: transparent;
+  pointer-events: none;
   box-sizing: border-box;
 }
 
@@ -609,10 +610,11 @@
   font-family: var(--font-inter);
   font-size: var(--text-sm);
   font-weight: var(--fw-semibold);
-  border: none;
+  border: 1px solid transparent;
   box-shadow: var(--shadow-card);
   transition: background-color 0.15s ease, transform 0.1s ease;
   cursor: pointer;
+  pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -624,9 +626,15 @@
   transform: scale(0.98);
 }
 
+.dark .filter-cta-wrapper {
+  background-color: transparent;
+}
+
 .dark .filter-cta-btn {
   background-color: var(--color-secondary-bg);
   color: var(--color-secondary-text);
+  border: 1px solid transparent;
+  box-shadow: none;
 }
 
 .dark .filter-cta-btn:hover {
