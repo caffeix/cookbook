@@ -39,6 +39,7 @@ ICON_SVGS = {
     "spatula": '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12v9"/><rect x="8" y="3" width="8" height="9" rx="1"/><line x1="10" y1="5" x2="10" y2="9"/><line x1="14" y1="5" x2="14" y2="9"/></svg>',
     "scale": '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M6 7.5l6-3 6 3"/><path d="M4 14l4-6.5"/><path d="M20 14l-4-6.5"/><rect x="2" y="14" width="8" height="2" rx="1"/><rect x="14" y="14" width="8" height="2" rx="1"/></svg>',
     "peeler": '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9"/><path d="M8 5h8v4a4 4 0 0 1-8 0V5z"/><line x1="9" y1="7" x2="15" y2="7"/></svg>',
+    "wok": '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11c0 5.5 4 9.5 9 9.5s9-4 9-9.5"/><line x1="2" y1="11" x2="22" y2="11"/><path d="M3 10c-1.5 0-2 .8-2 1.5s.5 1.5 2 1.5"/><path d="M21 10c1.5 0 2 .8 2 1.5s-.5 1.5-2 1.5"/><path d="M9 7c.5-.8.5-1.7 0-2.5"/><path d="M15 7c.5-.8.5-1.7 0-2.5"/></svg>',
 }
 
 
