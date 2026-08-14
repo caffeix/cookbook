@@ -731,6 +731,7 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
           // Force layout reflow before triggering slide-up
           void panel.offsetWidth;
           panel.classList.add('detail-panel--open');
+          document.body.style.overflow = 'hidden';
 
           if (pushState !== false) {
             history.pushState({ detailUrl: url }, '', url);
@@ -762,6 +763,7 @@ selected_appliances or selected_utensils or selected_ingredients or request.args
         scrim.classList.remove('detail-scrim--open');
         scrim.setAttribute('aria-hidden', 'true');
       }
+      document.body.style.overflow = '';
       if (pushState !== false) {
         history.pushState({}, '', listUrl);
       }

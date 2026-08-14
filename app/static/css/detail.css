@@ -8,7 +8,7 @@
 
 /* ── Detail Panel Overlay — Bottom Sheet Slide-Up ─────────────────────── */
 .detail-scrim {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 150;
   background-color: rgba(0, 0, 0, 0.38);
@@ -27,11 +27,15 @@
 }
 
 .detail-panel {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  max-width: 480px;
+  margin: 0 auto;
   z-index: 151;
   background-color: var(--color-bg);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
   transform: translate3d(0, 100%, 0);
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
@@ -460,9 +464,25 @@
       rgba(0, 0, 0, 0) 60%);
 }
 
+/* ── Detail Page Slide-Out Animation ───────────────────────────────────── */
+.detail-page {
+  transition: transform 0.18s cubic-bezier(0.4, 0, 1, 1), opacity 0.18s ease;
+}
+
+.detail-page--slide-out {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+}
+
 /* ── Desktop frame: card extends inside the rounded page-wrapper ─────────── */
 @media (min-width: 520px) {
   .detail-hero {
     height: 240px;
+  }
+
+  .detail-panel {
+    top: var(--space-6);
+    bottom: var(--space-6);
+    border-radius: calc(var(--radius-lg) - 6px);
   }
 }
