@@ -1,6 +1,7 @@
 services:
   - type: web
-    name: cookbook-app
+    name: cooksique
+    region: frankfurt
     runtime: python
     plan: free
     branch: main
