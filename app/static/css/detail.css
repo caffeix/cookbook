@@ -242,7 +242,6 @@
 .detail-ingredient {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
 }
 
 .detail-ingredient__row {
@@ -344,16 +343,19 @@
 .detail-swap {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.25s ease, opacity 0.2s ease;
+  transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease;
   opacity: 0;
-  border: 1px solid color-mix(in srgb, var(--color-accent-text) 30%, transparent);
+  border: 0 solid color-mix(in srgb, var(--color-accent-text) 30%, transparent);
   border-radius: var(--radius-sm);
+  margin-top: 0;
 }
 
 .detail-swap--open {
   max-height: 80px;
   /* generous ceiling — actual content ~38px */
   opacity: 1;
+  margin-top: var(--space-1);
+  border-width: 1px;
 }
 
 .detail-swap__text {
