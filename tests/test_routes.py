@@ -93,3 +93,28 @@ def test_recipe_search_appliances_utensils_instructions(app, client):
     assert "Crispy Fries" in res2.get_data(as_text=True)
 
 
+def test_ingredient_quantity_column(app, client):
+    from app.models import Ingredient, RecipeIngredient, IngredientRole
+    with app.app_context():
+        ing1 = Ingredient(name="Garlic", slug=slugify("Garlic"))
+        ing2 = Ingredient(name="Parsley", slug=slugify("Parsley"))
+        recipe = Recipe(title="Garlic Parsley Salad", description="Fresh salad")
+        db.session.add_all([ing1, ing2, recipe])
+        db.session.flush()
+
+        db.session.add_all([
+            RecipeIngredient(recipe_id=recipe.id, ingredient_id=ing1.id, quantity="2", unit="cloves", role=IngredientRole.MAIN),
+            RecipeIngredient(recipe_id=recipe.id, ingredient_id=ing2.id, quantity=None, unit=None, role=IngredientRole.OPTIONAL),
+        ])
+        db.session.commit()
+        recipe_id = recipe.id
+
+    res = client.get(f"/recipes/{recipe_id}")
+    assert res.status_code == 200
+    html = res.get_data(as_text=True)
+
+    assert '<span class="detail-ingredient__qty">2 cloves</span>' in html
+    assert '<span class="detail-ingredient__qty"></span>' in html
+
+
+

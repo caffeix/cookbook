@@ -21,8 +21,9 @@ loop_index : int — 1-based index from the parent loop (for unique toggle IDs)
     role="button" tabindex="0" aria-expanded="false" aria-controls="{{ swap_id }}" onclick="toggleSwap(this)"
     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSwap(this)}" {% endif %}>
 
-    {# Left: name + optional swap icon #}
+    {# Left: quantity/unit + name + optional swap icon #}
     <div class="detail-ingredient__left">
+      <span class="detail-ingredient__qty">{% if link.quantity %}{{ link.quantity }}{% if link.unit %} {{ link.unit }}{% endif %}{% elif link.unit %}{{ link.unit }}{% endif %}</span>
       <span class="detail-ingredient__name{% if has_swap %} detail-ingredient__name--swap{% endif %}">
         {{ link.ingredient.name }}
       </span>

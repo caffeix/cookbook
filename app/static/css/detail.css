@@ -285,6 +285,19 @@
   flex: 1;
 }
 
+.detail-ingredient__qty {
+  width: 4.5rem;
+  min-width: 4.5rem;
+  flex: 0 0 4.5rem;
+  font-size: var(--text-section-heading);
+  font-weight: var(--fw-normal);
+  color: var(--color-text-muted);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .detail-ingredient__name {
   font-size: var(--text-section-heading);
   font-weight: var(--fw-normal);
